@@ -251,7 +251,6 @@
 
         <service
             android:name=".x11.utils.KeyInterceptor"
-            android:foregroundServiceType="systemAlertWindow"
             android:exported="true"
             android:label="Termux:X11 KeyInterceptor"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >

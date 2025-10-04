@@ -1,0 +1,28 @@
+<resources>
+    <!-- Compat aliases for Theme.Material3Expressive.* parents used in this project.
+         These map to standard Material3 themes so builds succeed when the
+         Expressive variants aren't available in the material library. -->
+
+    <!-- Light / Dark dynamic colors parents -->
+    <style name="Theme.Material3Expressive.DynamicColors.Light.NoActionBar" parent="Theme.Material3.DynamicColors.Light.NoActionBar" />
+    <style name="Theme.Material3Expressive.DynamicColors.Dark.NoActionBar" parent="Theme.Material3.DynamicColors.Dark.NoActionBar" />
+
+    <!-- Fallbacks for other Expressive theme names referenced in layouts/styles -->
+    <style name="ThemeOverlay.Material3Expressive.AppBarWithSearch" parent="ThemeOverlay.Material3.Material3ActionBar" />
+
+    <!-- Button widget fallbacks mapped to Material3 widgets -->
+    <style name="Widget.Material3Expressive.Button" parent="Widget.Material3.Button" />
+    <style name="Widget.Material3Expressive.Button.OutlinedButton" parent="Widget.Material3.Button.Outlined" />
+    <style name="Widget.Material3Expressive.Button.TonalButton" parent="Widget.Material3.Button.Tonal" />
+
+    <!-- Aliases for specific Material3 names that may be missing in some material library versions -->
+    <style name="ThemeOverlay.Material3.Material3ActionBar" parent="ThemeOverlay.Material3.MaterialAlertDialog" />
+    <style name="Widget.Material3.Button.Outlined" parent="Widget.Material3.Button" />
+    <style name="Widget.Material3.Button.Tonal" parent="Widget.Material3.Button" />
+
+    <!-- MaterialAlertDialog expressive title/body fallbacks -->
+    <style name="MaterialAlertDialog.Material3Expressive.Title.Text" parent="MaterialAlertDialog.Material3.Title.Text" />
+
+    <!-- Any other small aliases that reference Expressive variants can be added here as needed. -->
+
+</resources>
