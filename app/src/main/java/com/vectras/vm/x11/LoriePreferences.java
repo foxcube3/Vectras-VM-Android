@@ -140,7 +140,7 @@ public class LoriePreferences extends AppCompatActivity {
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.x11));
+                collapsingToolbarLayout.setTitle(getString(R.string.x11));
             }
         }
 

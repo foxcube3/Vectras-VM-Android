@@ -16,7 +16,6 @@
     <style name="Widget.Material3Expressive.Button.TonalButton" parent="Widget.Material3.Button.Tonal" />
 
     <!-- Aliases for specific Material3 names that may be missing in some material library versions -->
-    <style name="ThemeOverlay.Material3.Material3ActionBar" parent="ThemeOverlay.Material3.MaterialAlertDialog" />
     <style name="Widget.Material3.Button.Outlined" parent="Widget.Material3.Button" />
     <style name="Widget.Material3.Button.Tonal" parent="Widget.Material3.Button" />
 

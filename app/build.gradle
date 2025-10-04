@@ -1,7 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
 }
 
 android {
@@ -24,8 +22,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    buildFeatures {
+        viewBinding true
+        dataBinding true
     }
 }
 
@@ -38,4 +40,34 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    // Common AndroidX / Material dependencies (provide styles, widgets and themes required by the layouts)
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'com.airbnb.android:lottie:5.2.0'
+    implementation project(':terminal-view')
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.google.guava:guava:32.1.2-android'
+    implementation 'org.zeroturnaround:zt-zip:1.14'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation 'androidx.activity:activity-ktx:1.8.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+}
+
+// Apply Crashlytics plugin if the classpath provides it
+try {
+    apply plugin: 'com.google.firebase.crashlytics'
+} catch (Exception ignored) {
+    logger.warn('Firebase Crashlytics Gradle plugin not available on classpath; skipping crashlytics setup.')
+}
+
+// Apply Google Services plugin only if google-services.json exists.
+if (file("google-services.json").exists()) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    logger.warn('google-services.json not found in app/ — skipping com.google.gms.google-services plugin. Add the file from Firebase Console to enable Analytics and other Firebase services.')
 }
