@@ -48,4 +48,15 @@
         <attr name="textCentered" format="boolean" />
     </declare-styleable>
 
+    <!-- App theme attributes referenced from theme.xml -->
+    <attr name="checkboxStyle" format="reference" />
+    <attr name="actionOverflowButtonStyle" format="reference" />
+    <attr name="fontFamily" format="reference|string" />
+    <attr name="chipStyle" format="reference" />
+    <attr name="windowActionModeOverlay" format="boolean" />
+    <attr name="windowActionBarOverlay" format="boolean" />
+    <attr name="alertDialogTheme" format="reference" />
+    <attr name="preferenceTheme" format="reference" />
+    <attr name="shapeAppearanceOverlay" format="reference" />
+
 </resources>

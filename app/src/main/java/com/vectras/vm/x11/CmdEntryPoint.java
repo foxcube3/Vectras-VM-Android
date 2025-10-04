@@ -88,7 +88,7 @@ public class CmdEntryPoint extends ICmdEntryInterface.Stub {
             String packageName;
             try {
                 packageName = android.app.ActivityThread.getPackageManager().getPackagesForUid(getuid())[0];
-            } catch (RemoteException ex) {
+            } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
             IActivityManager am;
@@ -102,14 +102,19 @@ public class CmdEntryPoint extends ICmdEntryInterface.Stub {
                     am = (IActivityManager) Class.forName("android.app.ActivityManagerNative")
                             .getMethod("getDefault")
                             .invoke(null);
-                } catch (Exception e3) {
-                    throw new RuntimeException(e3);
+                } catch (Exception exInner) {
+                    throw new RuntimeException(exInner);
                 }
             }
 
             assert am != null;
-            IIntentSender sender = am.getIntentSender(1, packageName, null, null, 0, new Intent[] { intent },
-                    null, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT, null, 0);
+            IIntentSender sender;
+            try {
+                sender = am.getIntentSender(1, packageName, null, null, 0, new Intent[] { intent },
+                        null, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT, null, 0);
+            } catch (Exception exSender) {
+                throw new RuntimeException(exSender);
+            }
             try {
                 //noinspection JavaReflectionMemberAccess
                 IIntentSender.class
@@ -117,8 +122,8 @@ public class CmdEntryPoint extends ICmdEntryInterface.Stub {
                         .invoke(sender, 0, intent, null, null, new IIntentReceiver.Stub() {
                             @Override public void performReceive(Intent i, int r, String d, Bundle e, boolean o, boolean s, int a) {}
                         }, null, null);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+            } catch (Exception exSend) {
+                throw new RuntimeException(exSend);
             }
         }
     }
