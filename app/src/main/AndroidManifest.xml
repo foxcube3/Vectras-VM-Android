@@ -23,6 +23,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission
         android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
@@ -157,7 +158,7 @@
             android:label="Download" />
         <activity
             android:name=".ImagePrvActivity"
-            android:exported="true"
+            android.exported="true"
             android:hardwareAccelerated="true" />
         <activity
             android:name=".PostActivity"
@@ -196,6 +197,7 @@
 
         <service
             android:name=".MainService"
+            android:foregroundServiceType="specialUse"
             android:exported="false" />
         <service
             android:name=".AudioStreamService"
@@ -212,6 +214,7 @@
 
         <service
             android:name="com.termux.app.TermuxService"
+            android:foregroundServiceType="shortService"
             android:exported="false" />
         <service
             android:name="com.termux.app.RunCommandService"
@@ -248,6 +251,7 @@
 
         <service
             android:name=".x11.utils.KeyInterceptor"
+            android:foregroundServiceType="systemAlertWindow"
             android:exported="true"
             android:label="Termux:X11 KeyInterceptor"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
