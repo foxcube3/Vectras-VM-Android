@@ -1,5 +1,7 @@
 package com.vectras.vm;
 
+import com.vectras.vm.shellloader.BuildConfig;
+
 public class Loader {
     /**
      * Command-line entry point.

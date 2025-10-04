@@ -106,7 +106,7 @@ public class CustomRomActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        binding.collapsingToolbarLayout.setSubtitle(MainSettingsManager.getArch(this));
+    binding.collapsingToolbarLayout.setTitle(MainSettingsManager.getArch(this));
 
         binding.drive.setOnClickListener(v -> diskPicker.launch("*/*"));
         binding.driveField.setOnClickListener(v -> diskPicker.launch("*/*"));
@@ -973,7 +973,7 @@ public class CustomRomActivity extends AppCompatActivity {
                     }
                 }
             }
-            binding.collapsingToolbarLayout.setSubtitle(MainSettingsManager.getArch(this));
+                binding.collapsingToolbarLayout.setTitle(MainSettingsManager.getArch(this));
         } catch (JSONException e) {
             Log.e(TAG, "afterExtractCVBIFile: " + e.getMessage());
         }

@@ -98,7 +98,7 @@ public class MainSettingsManager extends AppCompatActivity
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.general));
+                collapsingToolbarLayout.setTitle(getString(R.string.general));
             }
         }
 
@@ -153,7 +153,7 @@ public class MainSettingsManager extends AppCompatActivity
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.system));
+                collapsingToolbarLayout.setTitle(getString(R.string.system));
             }
 
             // Find the ListPreference and set the change listener
@@ -263,7 +263,7 @@ public class MainSettingsManager extends AppCompatActivity
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.personalization));
+                collapsingToolbarLayout.setTitle(getString(R.string.personalization));
             }
         }
 
@@ -376,7 +376,7 @@ public class MainSettingsManager extends AppCompatActivity
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.qemu));
+                collapsingToolbarLayout.setTitle(getString(R.string.qemu));
             }
 
             SwitchPreferenceCompat customMemory = findPreference("customMemory");
@@ -436,7 +436,7 @@ public class MainSettingsManager extends AppCompatActivity
                     requireActivity().findViewById(R.id.collapsingToolbarLayout);
 
             if (collapsingToolbarLayout != null) {
-                collapsingToolbarLayout.setSubtitle(getString(R.string.vnc_server));
+                collapsingToolbarLayout.setTitle(getString(R.string.vnc_server));
             }
 
         }

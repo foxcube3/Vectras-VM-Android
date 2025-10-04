@@ -325,7 +325,7 @@ public class X11Activity extends AppCompatActivity implements View.OnApplyWindow
                                     lorieView.getDisplay() != null
                                             ? lorieView.getDisplay().getName()
                                             : "screen");
-                        } catch (RemoteException e) {
+                        } catch (Exception e) {
                             Log.e("X11Activity", "failed to send windowChanged request", e);
                         }
                     }

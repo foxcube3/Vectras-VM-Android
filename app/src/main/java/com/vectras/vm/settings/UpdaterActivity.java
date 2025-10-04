@@ -61,7 +61,7 @@ public class UpdaterActivity extends AppCompatActivity {
     private void whenUpToDate() {
         binding.lpiProgressbar.setVisibility(View.GONE);
         binding.collapsingToolbarLayout.setTitle(getText(R.string.you_are_up_to_date));
-        binding.collapsingToolbarLayout.setSubtitle(PackageUtils.getThisVersionName(getApplicationContext()));
+    binding.collapsingToolbarLayout.setTitle(PackageUtils.getThisVersionName(getApplicationContext()));
         binding.bnUpdate.setText(getString(R.string.close));
     }
 
@@ -70,7 +70,7 @@ public class UpdaterActivity extends AppCompatActivity {
         binding.mcvWhatsnew.setVisibility(View.GONE);
         binding.lnBottombar.setVisibility(View.GONE);
         binding.collapsingToolbarLayout.setTitle(getText(R.string.checking_for_updates));
-        binding.collapsingToolbarLayout.setSubtitle(getText(R.string.just_a_sec));
+    binding.collapsingToolbarLayout.setTitle(getText(R.string.just_a_sec));
         binding.bnUpdate.setText(getString(R.string.update));
         downloadUrl = "";
         check();
@@ -112,7 +112,7 @@ public class UpdaterActivity extends AppCompatActivity {
 
                         if (versionCode < versionCodeonUpdate || !versionNameonUpdate.equals(versionName)) {
                             binding.collapsingToolbarLayout.setTitle(getText(R.string.new_update_available));
-                            binding.collapsingToolbarLayout.setSubtitle(getString(R.string.whats_new));
+                            binding.collapsingToolbarLayout.setTitle(getString(R.string.whats_new));
                             binding.mcvWhatsnew.setVisibility(View.VISIBLE);
                             binding.tvWhatsnewcontent.setMovementMethod(LinkMovementMethod.getInstance());
                             binding.tvWhatsnewcontent.setText(Html.fromHtml(whatsnew + "<br><br>Update size:<br>" + size));
