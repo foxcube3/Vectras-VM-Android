@@ -37,4 +37,15 @@
 
     </declare-styleable>
 
+    <!-- Missing custom attributes used in layouts -->
+    <declare-styleable name="WaveView">
+        <attr name="wavelength" format="dimension" />
+        <attr name="waveAmplitude" format="dimension" />
+        <attr name="waveSpeed" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="TextCenteredView">
+        <attr name="textCentered" format="boolean" />
+    </declare-styleable>
+
 </resources>

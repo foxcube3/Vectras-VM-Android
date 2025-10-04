@@ -1,6 +1,5 @@
 plugins {
     id 'com.android.application'
-    id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
 }
 
@@ -114,4 +113,13 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// Apply Google Services plugin only if google-services.json exists.
+// This lets developers build the app without the file (for CI or forks) while
+// still enabling Firebase when the file is present in the module directory.
+if (file("google-services.json").exists()) {
+    apply plugin: 'com.google.gms.google-services'
+} else {
+    logger.warn('google-services.json not found in app/ — skipping com.google.gms.google-services plugin. Add the file from Firebase Console to enable Analytics and other Firebase services.')
 }
