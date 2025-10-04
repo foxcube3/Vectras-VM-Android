@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "vectras-1678b"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }
