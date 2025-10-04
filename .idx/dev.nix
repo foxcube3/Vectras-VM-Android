@@ -7,6 +7,9 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     pkgs.gh
+    pkgs.jdk21
+    pkgs.gradle
+    pkgs.android-tools
     # pkgs.go
     # pkgs.python311
     # pkgs.python311Packages.pip
@@ -19,7 +22,25 @@
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
     extensions = [
-      # "vscodevim.vim"
+      "streetsidesoftware.code-spell-checker"
+      "vscjava.vscode-java-debug"
+      "vscjava.vscode-java-pack"
+      "Pleiades.java-extension-pack-jdk"
+      "vscjava.vscode-gradle"
+      "oderwat.indent-rainbow"
+      "redhat.java"
+      "ritwickdey.LiveServer"
+      "vscjava.vscode-maven"
+      "vscjava.vscode-java-dependency"
+      "mechatroner.rainbow-csv"
+      "vscjava.vscode-spring-boot-dashboard"
+      "vmware.vscode-boot-dev-pack"
+      "vmware.vscode-spring-boot"
+      "vscjava.vscode-spring-initializr"
+      "vscjava.vscode-java-test"
+      "Gruntfuggly.todo-tree"
+      "shardulm94.trailing-spaces"
+      "redhat.vscode-xml"
     ];
 
     # Enable previews
