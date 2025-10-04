@@ -1,9 +1,11 @@
-apply plugin: 'com.android.library'
-apply plugin: 'maven-publish'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 android {
     namespace "com.termux.terminal"
-    compileSdkVersion 34
+    compileSdk project.ext.compileApi
 
     buildTypes {
         release {
@@ -13,10 +15,9 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 21
-        //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 28
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        minSdkVersion project.ext.minApi
+        targetSdkVersion project.ext.targetApi
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
@@ -27,7 +28,6 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
-
 }
 
 tasks.withType(Test) {
@@ -40,7 +40,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-
 publishing {
     publications {
         bar(MavenPublication) {
@@ -50,7 +49,7 @@ publishing {
             artifact("$buildDir/outputs/aar/terminal-emulator-release.aar")
         }
     }
- 
+
     repositories {
         maven {
             name = "GitHubPackages"

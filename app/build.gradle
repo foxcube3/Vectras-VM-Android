@@ -4,27 +4,27 @@ plugins {
 }
 
 android {
-    namespace 'com.vectras.vm'
-    compileSdk 36
+    namespace = 'com.vectras.vm'
+    compileSdk = rootProject.ext.compileApi
 
     defaultConfig {
-        applicationId "com.vectras.vm"
-        minSdk 23
-        targetSdk 36
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        applicationId = "com.vectras.vm"
+        minSdk = rootProject.ext.minApi
+        targetSdk = rootProject.ext.targetApi
+        versionCode = 1
+        versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 

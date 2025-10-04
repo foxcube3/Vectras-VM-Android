@@ -3,12 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk project.ext.compileApi
+    namespace = 'com.vectras.vm.shellloader' // Added namespace
+    compileSdk = rootProject.ext.compileApi
 
     defaultConfig {
-        minSdkVersion project.ext.minApi
-        applicationId "com.vectras.vm.shellloader"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        minSdkVersion = rootProject.ext.minApi
+        applicationId = "com.vectras.vm.shellloader"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "logTag", "\"Termux:X11 loader\""
         buildConfigField "String", "CLASS_ID", "\"com.vectras.vm.x11.CmdEntryPoint\""
         buildConfigField "String", "packageNotInstalledErrorText",
@@ -16,21 +17,22 @@ android {
         buildConfigField "String", "packageSignatureMismatchErrorText",
                 "\"Signature verification of target application " + android.namespace + " failed.\\nPlease, reinstall both termux-x11 package and Termux:X11 application from the same source\""
         buildConfigField "String", "COMMIT", "\"" + ("git rev-parse HEAD\n".execute().getText().trim() ?: (System.getenv('CURRENT_COMMIT') ?: "NO_COMMIT")) + "\""
+        buildConfigField "int", "SIGNATURE", "-1" // Placeholder for signature
     }
 
     buildTypes {
         debug {
-            signingConfig null
+            signingConfig = null
         }
     }
 
     buildFeatures {
-        buildConfig true
+        buildConfig = true
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 
     applicationVariants.all { variant ->
@@ -41,13 +43,5 @@ android {
 }
 
 dependencies {
-    compileOnly project(':shell-loader:stub')
+    compileOnly(project(':shell-loader:stub'))
 }
-
-def signingConfig = project(':app').android.signingConfigs.debug
-// This block is left here to define SIGNATURE for BuildConfig if needed elsewhere
-ext.defaultBuildConfigField "int", "SIGNATURE", { ->
-    def keyStore = java.security.KeyStore.getInstance(java.security.KeyStore.getDefaultType())
-    keyStore.load(new FileInputStream(signingConfig.storeFile), signingConfig.keyPassword.toCharArray())
-    String.valueOf(Arrays.hashCode(keyStore.getCertificate(signingConfig.keyAlias).getEncoded()))
-}.call()
