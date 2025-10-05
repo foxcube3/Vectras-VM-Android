@@ -22,7 +22,7 @@ android {
         release {
             minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-    // ...existing code...
+        }
     }
     splits {
         abi {
@@ -34,16 +34,6 @@ android {
             } else {
                 include 'arm64-v8a'
                 universalApk false
-            }
-        }
-    }
-                logger.warn("[archive] WARNING: Using BIOS/OVMF fallback ${chosen.name} (${chosen.length()} bytes) instead of missing ${firmwareFile.name}; variable store / persistence may differ.")
-                try {
-                    java.nio.file.Files.copy(chosen.toPath(), firmwareFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-                    logger.lifecycle("[archive] Fallback copied to ${firmwareFile.name}")
-                } catch (Throwable t) {
-                    throw new GradleException("[archive] Failed to create fallback primary firmware file: ${t.message}", t)
-                }
             }
         }
     }
