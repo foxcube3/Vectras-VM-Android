@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #define LOG_TAG "termux-native"
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
@@ -153,4 +154,15 @@ Java_com_termux_terminal_JNI_close(JNIEnv* env, jclass clazz, jint fileDescripto
     if (close(fileDescriptor) < 0) {
         LOGE("close(%d) failed errno=%d", fileDescriptor, errno);
     }
+}
+
+// Send a POSIX signal to a subprocess pid. Returns 0 on success, -1 on failure (and logs errno).
+JNIEXPORT jint JNICALL
+Java_com_termux_terminal_JNI_sendSignal(JNIEnv* env, jclass clazz, jint processId, jint sig) {
+    (void)env; (void)clazz;
+    if (kill((pid_t)processId, sig) == -1) {
+        LOGE("kill(%d, %d) failed errno=%d", processId, sig, errno);
+        return -1;
+    }
+    return 0;
 }
