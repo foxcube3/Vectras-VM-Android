@@ -22,17 +22,8 @@ android {
         release {
             minifyEnabled = false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
+    // ...existing code...
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        viewBinding true
-        dataBinding true
-    }
-    // ABI splits: default only arm64-v8a (native lib present). Enable all with -PallAbis
     splits {
         abi {
             enable true
@@ -44,18 +35,8 @@ android {
                 include 'arm64-v8a'
                 universalApk false
             }
-            // Always attempt fallback if primary still missing
-            if (!firmwareFile.exists()) {
-                def patterns = [
-                    /^QEMU_VARS.*\.img$/, /^QEMU_EFI.*\.img$/, /^RELEASEX64_OVMF_VARS.*\.fd$/, /^RELEASEX64_OVMF.*\.fd$/, /^bios.*\.bin$/
-                ]
-                def candidates = firmwareDir.exists() ? (firmwareDir.listFiles()?.findAll { f -> patterns.any { p -> f.name ==~ p } } ?: []) : []
-                logger.lifecycle("[archive] Fallback candidate files: " + candidates.collect{it.name})
-                if (candidates.isEmpty()) {
-                    throw new GradleException("[archive] No fallback firmware candidates found in ${firmwareDir}. Directory contents: " + (firmwareDir.exists() ? firmwareDir.listFiles()?.collect{it.name} : []))
-                }
-                def chosen = candidates.sort { -it.length() }[0]
-                primarySource = 'fallbackBios'
+        }
+    }
                 logger.warn("[archive] WARNING: Using BIOS/OVMF fallback ${chosen.name} (${chosen.length()} bytes) instead of missing ${firmwareFile.name}; variable store / persistence may differ.")
                 try {
                     java.nio.file.Files.copy(chosen.toPath(), firmwareFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
