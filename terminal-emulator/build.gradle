@@ -17,6 +17,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            externalNativeBuild {
+                cmake {
+                    // Enable a RelWithDebInfo style variant: optimize but retain symbols for post-mortem debugging
+                    // (Gradle/AGP maps to CMAKE_BUILD_TYPE automatically per variant; ensure flags below)
+                    arguments "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+                }
+            }
         }
     }
 

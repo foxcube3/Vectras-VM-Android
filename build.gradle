@@ -31,3 +31,28 @@ ext {
 
 // Apply custom deprecated API scan plugin (implementation in buildSrc)
 apply plugin: 'com.vectras.deprecated-scan'
+
+// CI verification: ensure no lingering LFS pointer .so files committed
+tasks.register('verifyNoLfsPointers') {
+    description = 'Fails if any committed jniLibs/*.so files are Git LFS pointer stubs.'
+    group = 'verification'
+    doLast {
+        def pointer = 'version https://git-lfs'
+        def bad = []
+        fileTree('.') {
+            include '**/src/main/jniLibs/**/*.so'
+        }.each { f ->
+            if (f.text.startsWith(pointer)) {
+                bad << f
+            }
+        }
+        if (!bad.isEmpty()) {
+            throw new GradleException("Found LFS pointer .so files: " + bad.join(', '))
+        }
+        logger.lifecycle("[verifyNoLfsPointers] OK: no pointer .so files")
+    }
+}
+
+tasks.named('check') {
+    dependsOn 'verifyNoLfsPointers'
+}
