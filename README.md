@@ -94,3 +94,37 @@ Help support the project by contributing!
 [link-releases]: https://github.com/xoureldeen/Vectras-VM-Android/releases/
 [link-buymeacoffee]: https://www.buymeacoffee.com/vectrasvm
 [link-ko-fi]: https://ko-fi.com/vectrasvm
+
+## Firmware / ROM Assets (QEMU_VARS.img)
+
+Large firmware images are not committed directly to this fork to avoid Git LFS push restrictions on forks and to keep clone size small.
+
+The build includes a Gradle task `fetchFirmware` that will automatically download `QEMU_VARS.img` into `app/src/main/assets/roms/` if it is missing.
+
+By default it uses a placeholder URL. Override it by setting an environment variable before building:
+
+```bash
+export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS.img"
+./gradlew assembleDebug
+```
+
+On Windows PowerShell:
+```powershell
+$env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS.img"
+./gradlew.bat assembleDebug
+```
+
+To skip the automatic download (e.g., for CI where you inject the file another way):
+
+```bash
+./gradlew assembleDebug -PskipFirmware
+```
+
+Or manually run only the fetch:
+
+```bash
+./gradlew :app:fetchFirmware
+```
+
+If you maintain the upstream repository and want to host the file via Git LFS, add it there; forks will then reference the pointer without needing a separate download.
+
