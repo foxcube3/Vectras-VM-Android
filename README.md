@@ -149,16 +149,16 @@ Caching: ETag stored in a `.meta` file; future fetches can leverage conditional 
 Linux/macOS:
 
 ```bash
-export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS.img"
-export QEMU_VARS_SHA256="<expected_sha256>"
+export QEMU_VARS_URL="https://downloads.example.com/firmware/QEMU_VARS-default.img"
+export QEMU_VARS_SHA256="3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a" # sample SHA256
 ./gradlew assembleDebug
 ```
 
 PowerShell:
 
 ```powershell
-$env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS.img"
-$env:QEMU_VARS_SHA256 = "<expected_sha256>"
+$env:QEMU_VARS_URL = "https://downloads.example.com/firmware/QEMU_VARS-default.img"
+$env:QEMU_VARS_SHA256 = "3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a"  # sample SHA256
 ./gradlew.bat assembleDebug
 ```
 
@@ -166,8 +166,8 @@ Using Gradle properties instead of env vars:
 
 ```bash
 ./gradlew assembleDebug \
-  -PfirmwareUrl=https://your.hosted.location/QEMU_VARS-default.img \
-  -PfirmwareSha256=<expected_sha256> \
+  -PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img \
+  -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a \
   -PfirmwareVariant=default
 ```
 
@@ -190,7 +190,7 @@ Just fetch (default variant):
 Fetch + verify specific variant:
 
 ```bash
-./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=<expected_sha256>
+./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a
 ```
 
 Print hash:
@@ -202,7 +202,7 @@ Print hash:
 CI helper:
 
 ```bash
-./gradlew :app:ciFirmwareCheck -PfirmwareSha256=<expected_sha256>
+./gradlew :app:ciFirmwareCheck -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a
 ```
 
 ### Verification Failure Handling
@@ -223,6 +223,8 @@ On mismatch the file is deleted and the build fails, preventing stale/incomplete
 - Rotate / invalidate compromised assets by changing URL + hash.
 
 ### CI
+
+[![History Size Estimation](https://github.com/foxcube3/Vectras-VM-Android/actions/workflows/history-size-estimation.yml/badge.svg)](../../actions/workflows/history-size-estimation.yml)
 
 GitHub Actions workflow (`firmware-ci.yml`) runs variant matrix (default, debug) and a secure job with optional signature verification. Provide secrets:
 
