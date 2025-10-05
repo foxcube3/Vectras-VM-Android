@@ -77,9 +77,12 @@ dependencies {
 // NOTE: If both skipFirmware and verify requested, verify is effectively skipped (no file).
 
 def firmwareDir = file("${project.projectDir}/src/main/assets/roms")
-def firmwareFile = file("${firmwareDir}/QEMU_VARS.img")
+// Firmware variant (e.g., default, debug, secure). Allows multiple images hosted externally.
+def firmwareVariant = (project.findProperty('firmwareVariant') ?: System.getenv('QEMU_VARS_VARIANT') ?: 'default')
+def firmwareBaseName = 'QEMU_VARS'
+def firmwareFile = file("${firmwareDir}/${firmwareBaseName}-${firmwareVariant}.img")
 
-def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv('QEMU_VARS_URL') ?: 'https://example.com/path/to/QEMU_VARS.img')
+def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv('QEMU_VARS_URL') ?: "https://example.com/path/to/${firmwareBaseName}-${firmwareVariant}.img")
 def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv('QEMU_VARS_SHA256'))
 def maxAttempts = (project.findProperty('firmwareAttempts') ?: System.getenv('QEMU_VARS_ATTEMPTS') ?: '3') as int
 def skipFirmware = project.hasProperty('skipFirmware')
@@ -98,20 +101,60 @@ def computeSha256 = { File f ->
     return md.digest().collect { String.format('%02x', it) }.join('')
 }
 
+// Cache metadata (e.g., ETag) to allow conditional HTTP requests.
+def metadataFile = file("${firmwareDir}/${firmwareBaseName}-${firmwareVariant}.meta")
+def readMeta = { String key ->
+    if (!metadataFile.exists()) return null
+    def props = new Properties()
+    metadataFile.withInputStream { props.load(it) }
+    return props.getProperty(key)
+}
+def writeMeta = { Map<String,String> map ->
+    def props = new Properties()
+    if (metadataFile.exists()) {
+        metadataFile.withInputStream { props.load(it) }
+    } else {
+        if (!firmwareDir.exists()) firmwareDir.mkdirs()
+    }
+    map.each { k,v -> if (v!=null) props.setProperty(k,v) }
+    metadataFile.withOutputStream { out -> props.store(out, 'Firmware metadata cache') }
+}
+
 tasks.register('fetchFirmware') {
-    description = 'Downloads QEMU_VARS.img firmware asset if missing (with retries & optional SHA-256 verify).'
+    description = 'Downloads firmware image if missing or outdated (retries, SHA-256 verify, ETag cache).'
     group = 'vectras'
     outputs.file(firmwareFile)
     onlyIf { !skipFirmware }
     doLast {
-        if (firmwareFile.exists()) {
-            logger.lifecycle("Firmware already present: ${firmwareFile} (${firmwareFile.length()} bytes)")
-            return
+        boolean needsDownload = !firmwareFile.exists()
+        String cachedEtag = readMeta('etag')
+        if (!needsDownload) {
+            logger.lifecycle("Firmware present: ${firmwareFile.name} (${firmwareFile.length()} bytes)")
+            // Optionally attempt conditional HEAD to verify if remote changed when hash provided
+            // (skip if no hash + no variant change)
         }
         if (!firmwareDir.exists() && !firmwareDir.mkdirs()) {
             throw new GradleException("Could not create firmware directory: ${firmwareDir}")
         }
-        logger.lifecycle("Fetching firmware from ${firmwareUrl} (attempts max=${maxAttempts})")
+        if (!needsDownload) {
+            logger.lifecycle("No download needed (file exists). Use -PforceFirmware or delete file to refetch.")
+        }
+        if (project.hasProperty('forceFirmware')) {
+            logger.lifecycle('forceFirmware flag set: re-downloading regardless of existing file.')
+            needsDownload = true
+        }
+        if (!needsDownload) {
+            // Still perform integrity verification if expected hash provided
+            if (expectedSha256) {
+                def actualPre = computeSha256(firmwareFile)
+                if (!actualPre?.equalsIgnoreCase(expectedSha256)) {
+                    logger.lifecycle("Existing firmware hash mismatch; re-downloading.")
+                    needsDownload = true
+                }
+            }
+        }
+        if (!needsDownload) return
+        logger.lifecycle("Fetching firmware variant='${firmwareVariant}' from ${firmwareUrl} (maxAttempts=${maxAttempts})")
         int attempt = 1
         boolean success = false
         while (attempt <= maxAttempts && !success) {
@@ -122,6 +165,9 @@ tasks.register('fetchFirmware') {
                 url.openConnection().with { conn ->
                     conn.connectTimeout = 15000
                     conn.readTimeout = 600000 // 10 min
+                    if (cachedEtag) {
+                        conn.setRequestProperty('If-None-Match', cachedEtag)
+                    }
                     conn.inputStream.withCloseable { input ->
                         tmp.withOutputStream { out ->
                             byte[] buf = new byte[1 * 1024 * 1024]
@@ -139,6 +185,11 @@ tasks.register('fetchFirmware') {
                             }
                             logger.lifecycle(String.format(Locale.ROOT, "[attempt %d] Download complete (%,d bytes).", attempt, total))
                         }
+                    }
+                    def etag = conn.getHeaderField('ETag')
+                    if (etag) {
+                        writeMeta(etag: etag)
+                        logger.lifecycle("Captured ETag: ${etag}")
                     }
                 }
                 // Atomic move
@@ -195,6 +246,31 @@ tasks.register('verifyFirmware') {
             logger.lifecycle("No firmware SHA-256 provided or verification skipped.")
         }
     }
+}
+
+// Print computed SHA-256 (after fetch or existing) for convenience
+tasks.register('printFirmwareSha256') {
+    description = 'Prints SHA-256 of firmware file (fetches first if needed unless skipped).'
+    group = 'vectras'
+    dependsOn tasks.named('fetchFirmware')
+    doLast {
+        if (!firmwareFile.exists()) {
+            logger.lifecycle("Firmware not present; nothing to hash.")
+            return
+        }
+        def actual = computeSha256(firmwareFile)
+        logger.lifecycle("Firmware file: ${firmwareFile.name}")
+        logger.lifecycle("Variant: ${firmwareVariant}")
+        logger.lifecycle("SHA-256: ${actual}")
+        println(actual)
+    }
+}
+
+// Aggregate CI convenience task: fetch + verify (if hash) + print hash
+tasks.register('ciFirmwareCheck') {
+    description = 'CI helper: ensures firmware present, verifies (if hash), and prints hash.'
+    group = 'verification'
+    dependsOn tasks.named('verifyFirmware'), tasks.named('printFirmwareSha256')
 }
 
 // Ensure firmware is present before building APK (unless skipped)
