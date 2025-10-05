@@ -1,0 +1,8 @@
+app/src/main/assets/roms/QEMU_VARS.img
+remoteClientLib/build/intermediates/library_jni/debug/jni/x86_64/libgstreamer_android.so
+remoteClientLib/build/intermediates/library_jni/debug/jni/x86/libgstreamer_android.so
+remoteClientLib/build/intermediates/library_jni/debug/jni/arm64-v8a/libgstreamer_android.so
+remoteClientLib/build/intermediates/library_jni/debug/jni/armeabi-v7a/libgstreamer_android.so
+app/release/app-release.apk
+app/src/main/jniLibs/x86/libqemu-system-x86_64.so
+app/src/main/jniLibs/arm64-v8a/libqemu-system-x86_64.so

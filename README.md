@@ -102,38 +102,52 @@ Large firmware images are not committed directly to this fork to avoid Git LFS p
 The build includes Gradle tasks to automatically fetch and verify `QEMU_VARS.img` into `app/src/main/assets/roms/` when missing:
 
 Tasks:
+
 - `:app:fetchFirmware` – Download (with retries, ETag caching, progress) if absent or forced.
 - `:app:verifyFirmware` – Verify SHA-256 integrity (if an expected hash is provided).
 - `:app:printFirmwareSha256` – Output current firmware hash (fetches first if needed).
 - `:app:ciFirmwareCheck` – Aggregate (fetch + verify + print); useful in CI pipelines.
+- `:app:fetchAllFirmware` – Parallel download of all defined firmware assets.
+- `:app:ciAllFirmwareCheck` – Multi-asset aggregate verification.
+- `:app:verifyFirmwareSignature` – GPG signature verification (if signature URL provided).
+- `:app:ciAllFirmwareSecureCheck` – Multi-asset + hash + signature verification.
 
 ### Variants
+
 You may host multiple firmware variants (e.g., debug, secure). Select via:
+
 - Gradle property: `-PfirmwareVariant=debug`
 - Env var: `QEMU_VARS_VARIANT=debug`
+
 Default variant: `default`.
 
 Files are stored as `QEMU_VARS-<variant>.img`.
 
 ### URL Configuration Precedence
+
 1. Gradle property: `-PfirmwareUrl=https://.../QEMU_VARS-<variant>.img`
 2. Env var: `QEMU_VARS_URL`
 3. Fallback placeholder (will 404 until replaced)
 
 ### SHA-256 Integrity Verification
+
 Provide the expected hash to enforce verification:
+
 1. Gradle property: `-PfirmwareSha256=<hex>`
 2. Env var: `QEMU_VARS_SHA256`
 
 If omitted, verification logs a skip message. To skip only verification (even if hash supplied): add `-PskipFirmwareVerify`.
 
 ### Retry & Caching Logic
+
 Retries: default 3 (configure `-PfirmwareAttempts=5` or env `QEMU_VARS_ATTEMPTS=5`).
 Backoff: exponential (1s,2s,4s,8s ... capped at 30s). Progress logged ~every 5s.
 Caching: ETag stored in a `.meta` file; future fetches can leverage conditional requests (future optimization path).
 
 ### Environment Examples
+
 Linux/macOS:
+
 ```bash
 export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS.img"
 export QEMU_VARS_SHA256="<expected_sha256>"
@@ -141,6 +155,7 @@ export QEMU_VARS_SHA256="<expected_sha256>"
 ```
 
 PowerShell:
+
 ```powershell
 $env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS.img"
 $env:QEMU_VARS_SHA256 = "<expected_sha256>"
@@ -148,6 +163,7 @@ $env:QEMU_VARS_SHA256 = "<expected_sha256>"
 ```
 
 Using Gradle properties instead of env vars:
+
 ```bash
 ./gradlew assembleDebug \
   -PfirmwareUrl=https://your.hosted.location/QEMU_VARS-default.img \
@@ -156,41 +172,73 @@ Using Gradle properties instead of env vars:
 ```
 
 ### Skipping Fetch
+
 If CI or local workflows stage the file another way:
+
 ```bash
 ./gradlew assembleDebug -PskipFirmware
 ```
 
 ### Manual Invocation
+
 Just fetch (default variant):
+
 ```bash
 ./gradlew :app:fetchFirmware
 ```
+
 Fetch + verify specific variant:
+
 ```bash
 ./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=<expected_sha256>
 ```
+
 Print hash:
+
 ```bash
 ./gradlew :app:printFirmwareSha256 -PfirmwareVariant=secure
 ```
+
 CI helper:
+
 ```bash
 ./gradlew :app:ciFirmwareCheck -PfirmwareSha256=<expected_sha256>
 ```
 
 ### Verification Failure Handling
+
 On mismatch the file is deleted and the build fails, preventing stale/incomplete firmware from shipping.
 
 ### Hosting Recommendations
+
 - Upstream repository with Git LFS enabled.
 - Separate "assets" repository (LFS) referenced by releases.
 - Trusted CDN or object storage (S3, Cloudflare R2, etc.).
 
 ### Security Considerations
+
 - Always pin a SHA-256 for production distributions.
+- Optionally supply a detached GPG signature URL (`-PfirmwareSigUrl` or `QEMU_VARS_SIG_URL`) and run `:app:verifyFirmwareSignature`.
 - Prefer HTTPS and stable, versioned URLs.
 - Rotate / invalidate compromised assets by changing URL + hash.
 
+### CI
+
+GitHub Actions workflow (`firmware-ci.yml`) runs variant matrix (default, debug) and a secure job with optional signature verification. Provide secrets:
+
+- `QEMU_VARS_URL`, `QEMU_VARS_SHA256`, `QEMU_VARS_SIG_URL` (optional)
+- `RELEASEX64_OVMF_VARS_URL`, `RELEASEX64_OVMF_VARS_SHA256`
+
 If you maintain the upstream repository and want to host the file via Git LFS, add it there; forks will then reference the pointer without needing this fetch (you may later remove this mechanism or leave it as a fallback).
+
+### Optional Repository History Rewrite Toolkit
+
+This repository includes tooling (introduced in PR #1) to optionally purge legacy large binaries from Git history without committing new large objects:
+
+- `scripts/history-rewrite-plan.md` – Procedure (git-filter-repo) with safety steps.
+- `scripts/paths-to-remove.txt` – Canonical removal list.
+- `scripts/run-history-rewrite.ps1` / `scripts/run-history-rewrite.sh` – Automation helpers (create safety branch/tag, run filter, manual force-push step).
+- `scripts/estimate-post-rewrite-size.ps1` – Heuristic size impact estimator (may show zero if objects already pruned locally).
+
+The rewrite is deferred until maintainers explicitly approve a force-push window. See PR template: `.github/PULL_REQUEST_TEMPLATE/history-rewrite-followup.md` for a structured follow-up.
 
