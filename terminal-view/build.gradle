@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(myLibs.plugins.android.library)
     id 'maven-publish'
 }
 

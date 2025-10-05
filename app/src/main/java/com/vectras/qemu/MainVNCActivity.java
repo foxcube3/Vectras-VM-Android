@@ -1313,7 +1313,7 @@ public class MainVNCActivity extends VncCanvasActivity {
             return _data.size();
         }
 
-        public static class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
             public ViewHolder(View v) {
                 super(v);
             }

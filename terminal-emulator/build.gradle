@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.library)
+    alias(myLibs.plugins.android.library)
     id 'maven-publish'
 }
 
@@ -68,6 +68,11 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.7.1'
 }
 
+// Ensure Java 17 language level for switch expressions/rules
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+}
+
 publishing {
     publications {
         bar(MavenPublication) {
@@ -89,4 +94,5 @@ publishing {
             }
         }
     }
+// ...existing code...
 }

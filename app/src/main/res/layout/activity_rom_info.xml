@@ -1,12 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.vectras.vm.RomInfo">
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <!-- Variables go here if needed -->
+    </data>
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context="com.vectras.vm.RomInfo">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
@@ -38,28 +41,22 @@
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
+        android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="16dp">
-
                 <com.google.android.material.card.MaterialCardView
                     style="?attr/materialCardViewFilledStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="?attr/colorSurfaceContainer">
-
                     <ImageView
                         android:id="@+id/ivIcon"
                         android:layout_width="84dp"
@@ -68,13 +65,11 @@
                         android:src="@drawable/ic_computer_180dp_with_padding"
                         android:contentDescription="@null" />
                 </com.google.android.material.card.MaterialCardView>
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:paddingLeft="16dp">
-
                     <TextView
                         android:id="@+id/textName"
                         style="@android:style/Widget.TextView"
@@ -83,7 +78,6 @@
                         android:paddingBottom="4dp"
                         android:text="name"
                         android:textSize="25sp" />
-
                     <TextView
                         android:id="@+id/textSize"
                         android:layout_width="wrap_content"
@@ -91,21 +85,17 @@
                         android:text="size"
                         android:textSize="14sp" />
                 </LinearLayout>
-
             </LinearLayout>
-
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="none">
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:paddingVertical="16dp"
                     android:paddingHorizontal="8dp">
-
                     <LinearLayout
                         android:id="@+id/ln_verified"
                         android:layout_width="110dp"
@@ -114,14 +104,12 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:background="?attr/selectableItemBackground">
-
                         <ImageView
                             android:id="@+id/iv_verified"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/verified_user_24px"
                             android:contentDescription="@null" />
-
                         <TextView
                             android:id="@+id/tv_verified"
                             android:layout_width="wrap_content"
@@ -130,12 +118,10 @@
                             android:singleLine="true"
                             android:text="@string/verified" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="1dp"
                         android:layout_height="25dp"
                         android:background="?attr/colorSurfaceContainerHigh"/>
-
                     <LinearLayout
                         android:id="@+id/ln_creator"
                         android:layout_width="110dp"
@@ -144,13 +130,11 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:background="?attr/selectableItemBackground">
-
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/account_circle_24px"
                             android:contentDescription="@null" />
-
                         <TextView
                             android:id="@+id/tv_creator"
                             android:layout_width="wrap_content"
@@ -159,12 +143,10 @@
                             android:singleLine="true"
                             android:text="@string/unknow" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="1dp"
                         android:layout_height="25dp"
                         android:background="?attr/colorSurfaceContainerHigh"/>
-
                     <LinearLayout
                         android:id="@+id/ln_arch"
                         android:layout_width="110dp"
@@ -173,13 +155,11 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:background="?attr/selectableItemBackground">
-
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/devices_other_24px"
                             android:contentDescription="@null" />
-
                         <TextView
                             android:id="@+id/tv_arch"
                             android:layout_width="wrap_content"
@@ -188,12 +168,10 @@
                             android:singleLine="true"
                             android:text="@string/unknow" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="1dp"
                         android:layout_height="25dp"
                         android:background="?attr/colorSurfaceContainerHigh"/>
-
                     <LinearLayout
                         android:id="@+id/ln_size"
                         android:layout_width="110dp"
@@ -202,13 +180,11 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:background="?attr/selectableItemBackground">
-
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/hard_drive_24px"
                             android:contentDescription="@null" />
-
                         <TextView
                             android:id="@+id/tv_size"
                             android:layout_width="wrap_content"
@@ -217,12 +193,10 @@
                             android:singleLine="true"
                             android:text="@string/unknow" />
                     </LinearLayout>
-
                     <View
                         android:layout_width="1dp"
                         android:layout_height="25dp"
                         android:background="?attr/colorSurfaceContainerHigh"/>
-
                     <LinearLayout
                         android:id="@+id/ln_filename"
                         android:layout_width="110dp"
@@ -231,13 +205,11 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:background="?attr/selectableItemBackground">
-
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/file_copy_24px"
                             android:contentDescription="@null" />
-
                         <TextView
                             android:id="@+id/tv_filename"
                             android:layout_width="wrap_content"
@@ -248,14 +220,12 @@
                     </LinearLayout>
                 </LinearLayout>
             </HorizontalScrollView>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingVertical="8dp"
                 android:paddingHorizontal="16dp"
                 android:orientation="horizontal">
-
                 <Button
                     android:id="@+id/btn_download"
                     style="@style/Widget.Material3Expressive.Button"
@@ -264,7 +234,6 @@
                     android:layout_marginRight="4dp"
                     android:layout_weight="1"
                     android:text="@string/getit" />
-
                 <Button
                     android:id="@+id/btn_pick"
                     style="@style/Widget.Material3Expressive.Button.OutlinedButton"
@@ -274,7 +243,6 @@
                     android:layout_weight="1"
                     android:text="@string/import_settings" />
             </LinearLayout>
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -282,7 +250,6 @@
                 android:paddingHorizontal="16dp"
                 android:text="@string/description"
                 android:textSize="18sp" />
-
             <TextView
                 android:id="@+id/descTxt"
                 android:layout_width="wrap_content"
@@ -294,6 +261,5 @@
                 android:textIsSelectable="true" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>

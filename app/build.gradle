@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(myLibs.plugins.android.application)
 }
 
 // Hybrid firmware acquisition support (archive flow default). We add this import early so
@@ -43,6 +43,10 @@ android {
         }
     }
     // (Optional) specify ndkVersion for deterministic native builds; left unset to use default.
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
     lint {
         // Create a baseline for the existing lint warnings/errors so the build is not blocked.
         // Run `./gradlew updateLintBaseline` once to generate `lint-baseline.xml` and commit it.
@@ -50,31 +54,38 @@ android {
         baseline = file("lint-baseline.xml")
         abortOnError false
     }
+
+    compileOptions {
+        sourceCompatibility = 14
+        targetCompatibility = 14
+    }
 }
 
 dependencies {
     // Using version catalog aliases (see gradle/libs.versions.toml)
-    implementation libs.glide
+// ...existing code...
+    implementation myLibs.glide
+    implementation 'androidx.databinding:databinding-runtime:8.0.0'
     implementation 'androidx.annotation:annotation:1.7.1'
-    annotationProcessor libs.glide.compiler
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso
-    implementation libs.androidx.appcompat
-    implementation libs.androidx.core.ktx
-    implementation libs.material
-    implementation libs.preference
-    implementation libs.constraintlayout
-    implementation libs.lottie
+    annotationProcessor myLibs.glide.compiler
+    testImplementation myLibs.junit
+    androidTestImplementation myLibs.ext.junit
+    androidTestImplementation myLibs.espresso
+    implementation myLibs.androidx.appcompat
+    implementation myLibs.androidx.core.ktx
+    implementation myLibs.material
+    implementation myLibs.preference
+    implementation myLibs.constraintlayout
+    implementation myLibs.lottie
     implementation project(':terminal-view')
-    implementation libs.gson
-    implementation libs.retrofit
-    implementation libs.retrofit.gson
-    implementation libs.guava
-    implementation libs.ztzip
-    implementation libs.swiperefreshlayout
-    implementation libs.activity.ktx
-    implementation libs.recyclerview
+    implementation myLibs.gson
+    implementation myLibs.retrofit
+    implementation myLibs.retrofit.gson
+    implementation myLibs.guava
+    implementation myLibs.ztzip
+    implementation myLibs.swiperefreshlayout
+    implementation myLibs.activity.ktx
+    implementation myLibs.recyclerview
     // (Legacy explicit versions block from master removed in favor of version catalog above)
 }
 
@@ -190,6 +201,9 @@ tasks.register('resolveSetupArchive') {
         def chosen = keyCandidates.collect { k -> map[k] }.find { it != null }
         if (chosen == null) {
             throw new GradleException("[archive] No entry in setup manifest for arch='${setupArch}'. Available keys=${map.keySet()}")
+    buildFeatures {
+        dataBinding = true
+    }
         }
         resolvedArchiveUrlFile.text = chosen.trim()
         logger.lifecycle("[archive] Resolved setup archive URL: ${chosen}")

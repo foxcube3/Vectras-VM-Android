@@ -1,24 +1,27 @@
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/desktopLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-
-    <ListView
-        android:id="@+id/functions"
-        android:layout_width="56dp"
-        android:layout_height="150dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:background="@drawable/background1"
-        android:backgroundTint="?attr/colorPrimary"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:visibility="gone"
-        app:layout_constraintLeft_toLeftOf="parent"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <!-- Variables go here if needed -->
+    </data>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/desktopLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+        <ListView
+            android:id="@+id/functions"
+            android:layout_width="56dp"
+            android:layout_height="150dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/background1"
+            android:backgroundTint="?attr/colorPrimary"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
         tools:listitem="@layout/container_function" />
 
     <LinearLayout
@@ -241,4 +244,5 @@
             app:layout_constraintRight_toRightOf="parent" />
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
