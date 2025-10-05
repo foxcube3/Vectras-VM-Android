@@ -99,32 +99,79 @@ Help support the project by contributing!
 
 Large firmware images are not committed directly to this fork to avoid Git LFS push restrictions on forks and to keep clone size small.
 
-The build includes a Gradle task `fetchFirmware` that will automatically download `QEMU_VARS.img` into `app/src/main/assets/roms/` if it is missing.
+The build includes Gradle tasks to automatically fetch and verify `QEMU_VARS.img` into `app/src/main/assets/roms/` when missing:
 
-By default it uses a placeholder URL. Override it by setting an environment variable before building:
+Tasks:
+- `:app:fetchFirmware` – Download (with retries + progress) if absent.
+- `:app:verifyFirmware` – Verify SHA-256 integrity (if an expected hash is provided).
 
+### URL Configuration Precedence
+1. Gradle property: `-PfirmwareUrl=https://.../QEMU_VARS.img`
+2. Env var: `QEMU_VARS_URL`
+3. Fallback placeholder (will 404 until replaced)
+
+### SHA-256 Integrity Verification
+Provide the expected hash to enforce verification:
+1. Gradle property: `-PfirmwareSha256=<hex>`
+2. Env var: `QEMU_VARS_SHA256`
+
+If omitted, verification logs a skip message. To skip only verification (even if hash supplied): add `-PskipFirmwareVerify`.
+
+### Retry Logic
+Default attempts: 3. Configure via:
+- Gradle property: `-PfirmwareAttempts=5`
+- Env var: `QEMU_VARS_ATTEMPTS=5`
+
+Backoff is exponential (1s, 2s, 4s, 8s, capped at 30s per wait) with progress reports every ~5 seconds during download.
+
+### Environment Examples
+Linux/macOS:
 ```bash
 export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS.img"
+export QEMU_VARS_SHA256="<expected_sha256>"
 ./gradlew assembleDebug
 ```
 
-On Windows PowerShell:
+PowerShell:
 ```powershell
 $env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS.img"
+$env:QEMU_VARS_SHA256 = "<expected_sha256>"
 ./gradlew.bat assembleDebug
 ```
 
-To skip the automatic download (e.g., for CI where you inject the file another way):
+Using Gradle properties instead of env vars:
+```bash
+./gradlew assembleDebug -PfirmwareUrl=https://your.hosted.location/QEMU_VARS.img -PfirmwareSha256=<expected_sha256>
+```
 
+### Skipping Fetch
+If CI or local workflows stage the file another way:
 ```bash
 ./gradlew assembleDebug -PskipFirmware
 ```
 
-Or manually run only the fetch:
-
+### Manual Invocation
+Just fetch:
 ```bash
 ./gradlew :app:fetchFirmware
 ```
+Fetch + verify explicitly:
+```bash
+./gradlew :app:verifyFirmware -PfirmwareSha256=<expected_sha256>
+```
 
-If you maintain the upstream repository and want to host the file via Git LFS, add it there; forks will then reference the pointer without needing a separate download.
+### Verification Failure Handling
+On mismatch the file is deleted and the build fails, preventing stale/incomplete firmware from shipping.
+
+### Hosting Recommendations
+- Upstream repository with Git LFS enabled.
+- Separate "assets" repository (LFS) referenced by releases.
+- Trusted CDN or object storage (S3, Cloudflare R2, etc.).
+
+### Security Considerations
+- Always pin a SHA-256 for production distributions.
+- Prefer HTTPS and stable, versioned URLs.
+- Rotate / invalidate compromised assets by changing URL + hash.
+
+If you maintain the upstream repository and want to host the file via Git LFS, add it there; forks will then reference the pointer without needing this fetch (you may later remove this mechanism or leave it as a fallback).
 
