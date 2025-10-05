@@ -101,7 +101,35 @@ Help support the project by contributing!
 
 Large firmware images are not committed directly to this fork to avoid Git LFS push restrictions on forks and to keep clone size small.
 
-The build includes Gradle tasks to automatically fetch and verify `QEMU_VARS.img` into `app/src/main/assets/roms/` when missing:
+The build includes Gradle tasks to automatically fetch and verify firmware into `app/src/main/assets/roms/` when missing:
+
+### Hybrid Acquisition Model (Archive Flow Default)
+
+By default (new in this fork), firmware is sourced from an architecture-specific "setup" archive that already bundles QEMU and related blobs. This mirrors the runtime bootstrap logic (`SetupQemuActivity`) so we only maintain one authoritative distribution path.
+
+Archive flow is active when ALL are true:
+1. No explicit per‑file override (`-PfirmwareUrl` or `QEMU_VARS_URL`).
+2. `-PdisableSetupArchiveFlow` not present.
+3. The manifest (`setupfiles.json`) provides an entry for the selected architecture.
+
+Steps performed automatically:
+1. Resolve manifest (local copy at `web/data/setupfiles.json` or remote override via `-PsetupFilesUrl=` / `SETUPFILES_URL`).
+2. Pick archive URL for `setupArch` (default `arm64`; override with `-PsetupArch=` or env `SETUP_ARCH`).
+3. Download `vectras-vm-<arch>.tar.gz`.
+4. Extract only firmware patterns (`QEMU_VARS*.img`, `QEMU_EFI*.img`, `RELEASEX64_OVMF*.fd`, `bios*.bin`) into `app/src/main/assets/roms/`.
+5. Short‑circuit direct download portion of `fetchFirmware`.
+
+To force legacy per-file direct download mode, pass `-PdisableSetupArchiveFlow` and supply URLs/hashes as before.
+
+Key archive-related properties / env vars:
+
+| Purpose | Property | Env | Default |
+|---------|----------|-----|---------|
+| Setup manifest override URL | `setupFilesUrl` | `SETUPFILES_URL` | local `web/data/setupfiles.json` |
+| Target architecture | `setupArch` | `SETUP_ARCH` | `arm64` |
+| Disable archive flow | `disableSetupArchiveFlow` (flag) | — | (not set) |
+
+Primary extraction task chain: `fetchSetupManifest` -> `resolveSetupArchive` -> `downloadSetupArchive` -> `extractFirmwareFromArchive` (invoked implicitly by `fetchFirmware`).
 
 Tasks:
 
@@ -113,6 +141,7 @@ Tasks:
 - `:app:ciAllFirmwareCheck` – Multi-asset aggregate verification.
 - `:app:verifyFirmwareSignature` – GPG signature verification (if signature URL provided).
 - `:app:ciAllFirmwareSecureCheck` – Multi-asset + hash + signature verification.
+- `:app:firmwareArchivePresenceTest` – Asserts that archive-based extraction produced at least one expected firmware file (fails fast in CI if patterns drift).
 
 ### Variants
 
@@ -125,7 +154,7 @@ Default variant: `default`.
 
 Files are stored as `QEMU_VARS-<variant>.img`.
 
-### URL Configuration Precedence
+### URL Configuration Precedence (Per-file Mode)
 
 1. Gradle property: `-PfirmwareUrl=https://.../QEMU_VARS-<variant>.img`
 2. Env var: `QEMU_VARS_URL`
@@ -183,7 +212,20 @@ If CI or local workflows stage the file another way:
 
 ### Manual Invocation
 
-### Firmware Configuration Matrix
+Archive mode (default):
+
+```bash
+./gradlew :app:fetchFirmware   # Resolves + downloads archive (if needed) and extracts firmware
+cat app/src/main/assets/roms/firmware-inventory.json  # Machine-readable inventory (archive flow)
+```
+
+Force direct per-file mode:
+
+```bash
+./gradlew :app:fetchFirmware -PdisableSetupArchiveFlow -PfirmwareUrl=https://host/QEMU_VARS-default.img -PfirmwareSha256=<sha>
+```
+
+### Firmware Configuration Matrix (Combined)
 
 | Purpose | Gradle Property | Environment Variable | Example |
 |---------|-----------------|----------------------|---------|
@@ -195,6 +237,11 @@ If CI or local workflows stage the file another way:
 | Skip fetch (use pre-provided file) | `skipFirmware` (flag) | — | `-PskipFirmware` |
 | Skip verification | `skipFirmwareVerify` (flag) | — | `-PskipFirmwareVerify` |
 | Force re-download | `forceFirmware` (flag) | — | `-PforceFirmware` |
+| Use archive (default) | (no property) | — | (implicit) |
+| Disable archive flow | `disableSetupArchiveFlow` (flag) | — | `-PdisableSetupArchiveFlow` |
+| Setup manifest override | `setupFilesUrl` | `SETUPFILES_URL` | `-PsetupFilesUrl=https://raw.githubusercontent.com/.../setupfiles.json` |
+| Archive architecture | `setupArch` | `SETUP_ARCH` | `-PsetupArch=x86_64` |
+| Force archive re-download | `forceArchiveRedownload` (flag) | — | `-PforceArchiveRedownload` |
 | Allow sample placeholder SHA (suppress warning) | `allowSampleFirmwareSha` (flag) | — | `-PallowSampleFirmwareSha` |
 | Multi-asset URL override | `asset.<BASE>.url` | `<BASE>_URL` | `-Passet.RELEASEX64_OVMF_VARS.url=https://.../RELEASEX64_OVMF_VARS-default.fd` |
 | Multi-asset SHA override | `asset.<BASE>.sha256` | `<BASE>_SHA256` | `-Passet.RELEASEX64_OVMF_VARS.sha256=<sha>` |

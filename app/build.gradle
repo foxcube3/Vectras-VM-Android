@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+// Hybrid firmware acquisition support (archive flow default). We add this import early so
+// JsonSlurper is available to tasks defined later in the script.
+
 android {
     namespace = 'com.vectras.vm'
     compileSdk = rootProject.ext.compileApi
@@ -131,6 +134,153 @@ def computeSha256 = { File f ->
     return md.digest().collect { String.format('%02x', it) }.join('')
 }
 
+// ---------------- Hybrid Archive Flow (default) -------------------------------------------
+// Many upstream builds package firmware inside an architecture-specific setup archive.
+// We support extracting only the needed firmware blobs instead of per-file HTTP downloads.
+// Conditions enabling archive flow:
+//  - No explicit per-file override (no -PfirmwareUrl and no env for primary asset)
+//  - Not disabled via -PdisableSetupArchiveFlow
+// In archive mode, we:
+//  1. Obtain setupfiles.json (local copy or remote URL override)
+//  2. Resolve the per-arch archive URL
+//  3. Download the tar.gz
+//  4. Extract a subset of firmware files into the firmwareDir
+//  5. Short-circuit direct download tasks (they just validate presence)
+
+def perFileOverrideProvided = (project.hasProperty('firmwareUrl') || System.getenv(primaryAsset.envUrl))
+def archiveEnabled = !project.hasProperty('disableSetupArchiveFlow') && !perFileOverrideProvided
+def setupWorkDir = file("${buildDir}/firmwareSetup")
+def setupManifestFile = file("${setupWorkDir}/setupfiles.json")
+def resolvedArchiveUrlFile = file("${setupWorkDir}/resolved.url")
+def setupArchiveFile = file("${setupWorkDir}/setup.tar.gz")
+def setupFilesUrlProp = (project.findProperty('setupFilesUrl') ?: System.getenv('SETUPFILES_URL'))
+// Default arch detection: property > explicit override > arm64 fallback.
+def setupArch = (project.findProperty('setupArch') ?: System.getenv('SETUP_ARCH') ?: 'arm64')
+
+tasks.register('fetchSetupManifest') {
+    group = 'vectras'
+    description = 'Obtains setupfiles.json manifest (local copy or remote override).'
+    onlyIf { archiveEnabled }
+    outputs.file(setupManifestFile)
+    doLast {
+        if (!setupWorkDir.exists()) setupWorkDir.mkdirs()
+        if (setupFilesUrlProp) {
+            logger.lifecycle("[archive] Downloading setup manifest from ${setupFilesUrlProp}")
+            new URL(setupFilesUrlProp).withInputStream { ins -> setupManifestFile.bytes = ins.bytes }
+        } else {
+            // Use repo-local copy to avoid network when possible
+            def local = file("${rootProject.projectDir}/web/data/setupfiles.json")
+            if (!local.exists()) throw new GradleException("Local setupfiles.json not found at ${local}")
+            logger.lifecycle("[archive] Using local setup manifest ${local}")
+            setupManifestFile.text = local.text
+        }
+        logger.lifecycle("[archive] setupfiles.json saved (${setupManifestFile.length()} bytes)")
+    }
+}
+
+tasks.register('resolveSetupArchive') {
+    group = 'vectras'
+    description = 'Parses setupfiles.json to find archive URL for the selected architecture.'
+    onlyIf { archiveEnabled }
+    dependsOn 'fetchSetupManifest'
+    outputs.file(resolvedArchiveUrlFile)
+    doLast {
+        // Lightweight manual parse (manifest is simple key:value JSON object).
+        def map = [:]
+        setupManifestFile.eachLine { line ->
+            def m = line =~ /"([^\"]+)"\s*:\s*"([^\"]+)"/
+            if (m.find()) {
+                map[m.group(1)] = m.group(2)
+            }
+        }
+        if (map.isEmpty()) throw new GradleException('[archive] Failed to parse setup manifest (no key:value pairs found).')
+        def keyCandidates = [setupArch, setupArch.toLowerCase(), setupArch.toUpperCase()]
+        def chosen = keyCandidates.collect { k -> map[k] }.find { it != null }
+        if (chosen == null) {
+            throw new GradleException("[archive] No entry in setup manifest for arch='${setupArch}'. Available keys=${map.keySet()}")
+        }
+        resolvedArchiveUrlFile.text = chosen.trim()
+        logger.lifecycle("[archive] Resolved setup archive URL: ${chosen}")
+    }
+}
+
+tasks.register('downloadSetupArchive') {
+    group = 'vectras'
+    description = 'Downloads architecture-specific setup archive (tar.gz) referenced by manifest.'
+    onlyIf { archiveEnabled }
+    dependsOn 'resolveSetupArchive'
+    outputs.file(setupArchiveFile)
+    doLast {
+        if (!setupWorkDir.exists()) setupWorkDir.mkdirs()
+        String url = resolvedArchiveUrlFile.text.trim()
+        logger.lifecycle("[archive] Fetching setup archive from ${url}")
+        File tmp = new File(setupArchiveFile.parentFile, setupArchiveFile.name + '.part')
+        if (tmp.exists()) tmp.delete()
+        int attempt = 1; int max = 3; boolean ok = false
+        while (attempt <= max && !ok) {
+            try {
+                new URL(url).openConnection().with { conn ->
+                    conn.connectTimeout = 20000; conn.readTimeout = 900000
+                    conn.inputStream.withCloseable { ins -> tmp.withOutputStream { out -> out << ins } }
+                }
+                if (setupArchiveFile.exists()) setupArchiveFile.delete()
+                if (!tmp.renameTo(setupArchiveFile)) throw new GradleException("[archive] Could not finalize archive file")
+                ok = true
+            } catch (Throwable t) {
+                logger.warn("[archive] attempt ${attempt} failed: ${t.class.simpleName}: ${t.message}")
+                attempt++
+                if (attempt <= max) {
+                    sleep((long)Math.min(30000, Math.pow(2, attempt - 2) * 1000L))
+                }
+            }
+        }
+        if (!ok) throw new GradleException("[archive] Failed to download setup archive after ${max} attempts")
+        logger.lifecycle("[archive] Archive downloaded (${setupArchiveFile.length()} bytes)")
+    }
+}
+
+tasks.register('extractFirmwareFromArchive') {
+    group = 'vectras'
+    description = 'Extracts firmware files from setup archive into firmwareDir.'
+    onlyIf { archiveEnabled }
+    dependsOn 'downloadSetupArchive'
+    // We declare the primary firmware file as an output indicator; others are implicit.
+    outputs.dir(firmwareDir)
+    doLast {
+        if (!setupArchiveFile.exists()) throw new GradleException('[archive] Archive missing before extraction.')
+        if (!firmwareDir.exists()) firmwareDir.mkdirs()
+        // Extract only relevant firmware patterns (tunable list).
+        def patterns = [
+            'QEMU_VARS*.img', 'QEMU_EFI*.img',
+            'RELEASEX64_OVMF*.fd', 'bios-*.bin', 'bios*.bin'
+        ]
+        logger.lifecycle("[archive] Extracting firmware patterns: ${patterns}")
+        // Use a temporary expand dir then selective copy (ensures patterns work across subdirs)
+        def tree = project.tarTree(resources.gzip(setupArchiveFile))
+        def extracted = [] as Set
+        tree.visit { f ->
+            if (!f.isDirectory()) {
+                def name = f.name
+                boolean match = patterns.any { pat ->
+                    def regex = pat.replace('.', '\\.').replace('*', '.*')
+                    return name ==~ /${regex}/
+                }
+                if (match) {
+                    // Copy stream contents into target file under firmwareDir
+                    def target = new File(firmwareDir, name)
+                    target.withOutputStream { out -> out << f.open() }
+                    extracted << name
+                }
+            }
+        }
+        if (extracted.isEmpty()) {
+            logger.warn('[archive] No firmware files matched extraction patterns – check archive contents or patterns.')
+        } else {
+            logger.lifecycle("[archive] Extracted firmware files: ${extracted.join(', ')}")
+        }
+    }
+}
+
 // Cache metadata (e.g., ETag) to allow conditional HTTP requests.
 def metadataFiles = firmwareAssets.collect { a -> file("${firmwareDir}/${a.base}-${firmwareVariant}.meta") }
 def metadataFile = metadataFiles[0]
@@ -152,7 +302,19 @@ tasks.register('fetchFirmware') {
     group = 'vectras'
     outputs.file(firmwareFile)
     onlyIf { !skipFirmware }
+    // In archive mode we ensure extraction before checking presence
+    if (archiveEnabled) {
+        dependsOn 'extractFirmwareFromArchive'
+    }
     doLast {
+    if (archiveEnabled) {
+        if (firmwareFile.exists()) {
+            logger.lifecycle("[archive] Firmware present via archive extraction (${firmwareFile.name}, ${firmwareFile.length()} bytes). Skipping direct download.")
+        } else {
+            throw new GradleException("[archive] Expected firmware file not found after extraction: ${firmwareFile}")
+        }
+        return // short-circuit direct download logic
+    }
     boolean needsDownload = !firmwareFile.exists()
     String cachedEtag = readMetaFile(metadataFile, 'etag')
         if (!needsDownload) {
@@ -463,6 +625,25 @@ tasks.register('firmwareQualityGate') {
     group = 'verification'
     description = 'Fetch all firmware, verify primary hash, optional signature, print hash, and assert sample SHA not used.'
     dependsOn 'ciAllFirmwareSecureCheck', 'assertNoSampleFirmwareSha'
+}
+
+// Simple assertion task for CI: ensure archive extraction actually produced at least one firmware file.
+tasks.register('firmwareArchivePresenceTest') {
+    group = 'verification'
+    description = 'Fails if archive flow enabled and no expected firmware files were extracted.'
+    onlyIf { archiveEnabled }
+    dependsOn 'extractFirmwareFromArchive'
+    doLast {
+        def expectedPatterns = [
+            /^QEMU_VARS.*\.img$/, /^QEMU_EFI.*\.img$/, /^RELEASEX64_OVMF.*\.fd$/, /^bios.*\.bin$/
+        ]
+        if (!firmwareDir.exists()) throw new GradleException('[archive-test] Firmware directory missing.')
+        def matches = firmwareDir.listFiles()?.findAll { f -> expectedPatterns.any { p -> f.name ==~ p } } ?: []
+        if (matches.isEmpty()) {
+            throw new GradleException('[archive-test] No firmware files found after extraction; check archive or patterns.')
+        }
+        logger.lifecycle("[archive-test] Found firmware files: ${matches.collect{it.name}.join(', ')}")
+    }
 }
 // Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {

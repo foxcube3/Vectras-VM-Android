@@ -51,6 +51,16 @@ jobs:
         run: ./gradlew :app:ciAllFirmwareCheck :app:assertNoSampleFirmwareSha -PfirmwareVariant=${{ matrix.variant }} --no-daemon --stacktrace
       - name: Print Primary Firmware Hash
         run: ./gradlew :app:printFirmwareSha256 -PfirmwareVariant=${{ matrix.variant }} --no-daemon
+      - name: Archive Presence / Inventory (default only)
+        if: matrix.variant == 'default'
+        run: ./gradlew :app:firmwareArchivePresenceTest --no-daemon --stacktrace
+      - name: Upload Firmware Inventory
+        if: matrix.variant == 'default' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-inventory
+          path: app/src/main/assets/roms/firmware-inventory.json
+          if-no-files-found: warn
   secure-firmware:
     if: ${{ always() }}
     runs-on: ubuntu-latest
