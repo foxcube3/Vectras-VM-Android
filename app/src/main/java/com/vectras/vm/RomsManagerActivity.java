@@ -170,20 +170,23 @@ public class RomsManagerActivity extends AppCompatActivity {
             List<DataRoms> allData = gson.fromJson(contentJSON, listType);
             List<DataRoms> filteredData = new ArrayList<>();
 
+            String lcKeyword = (keyword == null) ? "" : keyword.toLowerCase(java.util.Locale.ROOT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 filteredData = allData.stream()
                         .filter(rom -> {
                             String romName = (rom.romName != null) ? rom.romName : "";
                             String romKernel = (rom.romKernel != null) ? rom.romKernel : "";
 
-                            return romName.toLowerCase().contains(keyword.toLowerCase())
-                                    || romKernel.toLowerCase().contains(keyword.toLowerCase());
+                            return romName.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword)
+                                    || romKernel.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword);
                         })
                         .collect(Collectors.toList());
             } else {
                 for (DataRoms rom : allData) {
-                    if (rom.romName.toLowerCase().contains(keyword.toLowerCase()) ||
-                            rom.romKernel.toLowerCase().contains(keyword.toLowerCase())) {
+                    String romName = (rom.romName != null) ? rom.romName : "";
+                    String romKernel = (rom.romKernel != null) ? rom.romKernel : "";
+                    if (romName.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword) ||
+                            romKernel.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword)) {
                         filteredData.add(rom);
                     }
                 }

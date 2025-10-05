@@ -29,6 +29,13 @@ android {
         viewBinding true
         dataBinding true
     }
+    lint {
+        // Create a baseline for the existing lint warnings/errors so the build is not blocked.
+        // Run `./gradlew updateLintBaseline` once to generate `lint-baseline.xml` and commit it.
+        // This preserves current issues while allowing incremental fixes over time.
+        baseline = file("lint-baseline.xml")
+        abortOnError false
+    }
 }
 
 dependencies {

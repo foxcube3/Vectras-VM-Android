@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -50,7 +51,6 @@ public class Terminal {
         this.context = context;
     }
 
-
     private String getLocalIpAddress() {
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
@@ -84,7 +84,7 @@ public class Terminal {
         com.vectras.vm.logger.VectrasStatus.logError("<font color='#4db6ac'>VTERM: >" + userCommand + "</font>");
 
         // Show ProgressDialog
-        View progressView = LayoutInflater.from(dialogActivity).inflate(R.layout.dialog_progress_style, null);
+    View progressView = LayoutInflater.from(dialogActivity).inflate(R.layout.dialog_progress_style, new FrameLayout(dialogActivity), false);
         TextView progress_text = progressView.findViewById(R.id.progress_text);
         progress_text.setText(dialogActivity.getString(R.string.executing_command_please_wait));
         AlertDialog progressDialog = new MaterialAlertDialogBuilder(dialogActivity, R.style.CenteredDialogTheme)
@@ -477,7 +477,7 @@ public class Terminal {
         com.vectras.vm.logger.VectrasStatus.logError("<font color='#4db6ac'>VTERM: >" + userCommand + "</font>");
 
         // Show ProgressDialog on the main thread
-        View progressView = LayoutInflater.from(dialogActivity).inflate(R.layout.dialog_progress_style, null);
+    View progressView = LayoutInflater.from(dialogActivity).inflate(R.layout.dialog_progress_style, new FrameLayout(dialogActivity), false);
         TextView progress_text = progressView.findViewById(R.id.progress_text);
         progress_text.setText(dialogActivity.getString(R.string.executing_command_please_wait));
         AlertDialog progressDialog = new MaterialAlertDialogBuilder(dialogActivity, R.style.CenteredDialogTheme)

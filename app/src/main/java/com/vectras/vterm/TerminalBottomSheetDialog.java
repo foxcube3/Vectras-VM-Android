@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.FrameLayout;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ScrollView;
@@ -39,8 +40,8 @@ public class TerminalBottomSheetDialog {
     public TerminalBottomSheetDialog(Activity activity) {
         this.activity = activity;
 
-        bottomSheetDialog = new BottomSheetDialog(activity);
-        view = activity.getLayoutInflater().inflate(R.layout.terminal_bottom_sheet, null);
+    bottomSheetDialog = new BottomSheetDialog(activity);
+    view = activity.getLayoutInflater().inflate(R.layout.terminal_bottom_sheet, new FrameLayout(activity), false);
         bottomSheetDialog.setContentView(view);
 
         terminalOutput = view.findViewById(R.id.tvTerminalOutput);

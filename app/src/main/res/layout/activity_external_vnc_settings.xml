@@ -119,7 +119,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:src="@drawable/content_copy_24px"
-                                android:background="?attr/selectableItemBackgroundBorderless"/>
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/copy"/>
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
@@ -138,7 +139,8 @@
                     android:layout_marginRight="8dp"
                     android:padding="4dp"
                     android:scaleType="fitXY"
-                    android:src="@drawable/info_24px" />
+                    android:src="@drawable/info_24px"
+                    android:contentDescription="@null" />
 
                 <TextView
                     android:layout_width="wrap_content"

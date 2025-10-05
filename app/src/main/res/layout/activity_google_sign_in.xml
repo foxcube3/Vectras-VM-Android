@@ -21,7 +21,8 @@
             android:layout_height="48dp"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="15dp"
-            android:src="@drawable/ic_google" />
+            android:src="@drawable/ic_google"
+            android:contentDescription="@null" />
 
         <TextView
             android:id="@+id/title_text"

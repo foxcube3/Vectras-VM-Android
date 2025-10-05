@@ -1,0 +1,13 @@
+<resources>
+    <!-- Provide PreferenceThemeOverlay used by the app's themes -->
+    <style name="PreferenceThemeOverlay" parent="Theme.MaterialComponents.DayNight">
+    </style>
+
+    <!-- Ensure ThemeOverlay.Material3.MaterialAlertDialog exists (map to MaterialComponents overlay) -->
+    <style name="ThemeOverlay.Material3.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    </style>
+
+    <!-- Minimal alias for ThemeOverlay.Material3.Material3ActionBar used earlier -->
+    <style name="ThemeOverlay.Material3.Material3ActionBar" parent="ThemeOverlay.MaterialComponents.ActionBar" />
+
+</resources>

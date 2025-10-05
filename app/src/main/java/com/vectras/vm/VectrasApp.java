@@ -259,7 +259,7 @@ public class VectrasApp extends Application {
 
 		private static class UncaughtExceptionHandlerImpl implements UncaughtExceptionHandler {
 
-			private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss");
+		private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd-HH_mm_ss", java.util.Locale.US);
 
 			private final Context mContext;
 
