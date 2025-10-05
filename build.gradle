@@ -33,12 +33,24 @@ ext {
 apply plugin: 'com.vectras.deprecated-scan'
 
 // CI verification: ensure no lingering LFS pointer .so files committed
-tasks.register('verifyNoLfsPointers', Exec) {
-    description = 'Fails if any libtermux.so entries are still Git LFS pointer text files.'
+tasks.register('verifyNoLfsPointers') {
+    description = 'Fails if any committed jniLibs/*.so files are Git LFS pointer stubs.'
     group = 'verification'
-    commandLine 'bash', 'scripts/ci-verify-no-lfs-pointers.sh'
-    // Windows users without bash can skip locally; CI (Ubuntu) will run it.
-    onlyIf { System.getenv('CI') != null || org.gradle.internal.os.OperatingSystem.current().isUnix() }
+    doLast {
+        def pointer = 'version https://git-lfs'
+        def bad = []
+        fileTree('.') {
+            include '**/src/main/jniLibs/**/*.so'
+        }.each { f ->
+            if (f.text.startsWith(pointer)) {
+                bad << f
+            }
+        }
+        if (!bad.isEmpty()) {
+            throw new GradleException("Found LFS pointer .so files: " + bad.join(', '))
+        }
+        logger.lifecycle("[verifyNoLfsPointers] OK: no pointer .so files")
+    }
 }
 
 tasks.named('check') {
