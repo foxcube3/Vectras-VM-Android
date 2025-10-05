@@ -247,6 +247,7 @@ tasks.register('extractFirmwareFromArchive') {
     // We declare the primary firmware file as an output indicator; others are implicit.
     outputs.dir(firmwareDir)
     doLast {
+        def setupArchiveShaFile = file("${setupWorkDir}/setup.tar.gz.sha256")
         if (!setupArchiveFile.exists()) throw new GradleException('[archive] Archive missing before extraction.')
         if (!firmwareDir.exists()) firmwareDir.mkdirs()
         // Extract only relevant firmware patterns (tunable list).
@@ -278,6 +279,21 @@ tasks.register('extractFirmwareFromArchive') {
         } else {
             logger.lifecycle("[archive] Extracted firmware files: ${extracted.join(', ')}")
         }
+        // Initial inventory (will be enriched later with primarySource)
+        def invList = extracted.collect { n ->
+            def f = new File(firmwareDir, n)
+            [ name: n, size: f.length(), sha256: computeSha256(f), source: 'archive' ]
+        }
+        def invFile = new File(firmwareDir, 'firmware-inventory.json')
+        invFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson([
+            archiveUrl: (resolvedArchiveUrlFile.exists() ? resolvedArchiveUrlFile.text.trim() : null),
+            archiveSha256: (setupArchiveShaFile.exists() ? setupArchiveShaFile.text.trim() : null),
+            architecture: setupArch,
+            primarySource: null,
+            generatedAtUtc: new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone('UTC')),
+            files: invList
+        ]))
+        logger.lifecycle("[archive] Inventory initialized: ${invFile}")
     }
 }
 
@@ -308,10 +324,96 @@ tasks.register('fetchFirmware') {
     }
     doLast {
     if (archiveEnabled) {
-        if (firmwareFile.exists()) {
-            logger.lifecycle("[archive] Firmware present via archive extraction (${firmwareFile.name}, ${firmwareFile.length()} bytes). Skipping direct download.")
-        } else {
-            throw new GradleException("[archive] Expected firmware file not found after extraction: ${firmwareFile}")
+        String primarySource = 'archive'
+        def baseNoVariantFile = new File(firmwareDir, "${firmwareBaseName}.img")
+        def upstreamBaseUrl = (project.findProperty('rawFirmwareBaseUrl') ?: System.getenv('RAW_FIRMWARE_BASE_URL') ?: 'https://raw.githubusercontent.com/xoureldeen/Vectras-VM-Android/master/app/src/main/assets/roms')
+        if (!firmwareFile.exists()) {
+            if (firmwareVariant == 'default' && !baseNoVariantFile.exists()) {
+                def rawUrl = upstreamBaseUrl.endsWith('/') ? upstreamBaseUrl + "${firmwareBaseName}.img" : upstreamBaseUrl + '/' + "${firmwareBaseName}.img"
+                logger.lifecycle("[archive] Primary asset missing; attempting upstream raw fetch: ${rawUrl}")
+                try {
+                    new URL(rawUrl).openConnection().with { c ->
+                        c.connectTimeout = 15000; c.readTimeout = 120000
+                        c.inputStream.withCloseable { ins -> baseNoVariantFile.withOutputStream { out -> out << ins } }
+                    }
+                    if (baseNoVariantFile.exists() && baseNoVariantFile.length() > 0) {
+                        primarySource = 'upstreamRaw'
+                        logger.lifecycle("[archive] Retrieved upstream raw firmware (${baseNoVariantFile.length()} bytes)")
+                        // Upstream SHA check early (expected hash may target this canonical file)
+                        if (expectedSha256) {
+                            def upstreamSha = computeSha256(baseNoVariantFile)
+                            if (!upstreamSha?.equalsIgnoreCase(expectedSha256)) {
+                                baseNoVariantFile.delete()
+                                throw new GradleException("[archive] Upstream raw firmware hash mismatch. Expected=${expectedSha256} Actual=${upstreamSha}")
+                            }
+                            logger.lifecycle("[archive] Upstream raw firmware SHA-256 verified (${upstreamSha})")
+                        }
+                    }
+                } catch (Throwable t) {
+                    logger.warn("[archive] Upstream raw fetch failed: ${t.class.simpleName}: ${t.message}")
+                }
+            }
+            if (!firmwareFile.exists() && baseNoVariantFile.exists()) {
+                try {
+                    java.nio.file.Files.copy(baseNoVariantFile.toPath(), firmwareFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                    logger.lifecycle("[archive] Using upstream base firmware as primary (${firmwareFile.name})")
+                } catch (Throwable t) {
+                    logger.warn("[archive] Failed copying upstream base to variant name: ${t.message}")
+                }
+            }
+            if (!firmwareFile.exists()) {
+                def patterns = [
+                    /^QEMU_VARS.*\.img$/, /^QEMU_EFI.*\.img$/, /^RELEASEX64_OVMF_VARS.*\.fd$/, /^RELEASEX64_OVMF.*\.fd$/, /^bios.*\.bin$/
+                ]
+                def candidates = firmwareDir.exists() ? (firmwareDir.listFiles()?.findAll { f -> patterns.any { p -> f.name ==~ p } } ?: []) : []
+                if (candidates.isEmpty()) {
+                    throw new GradleException("[archive] Expected firmware file not found after extraction; upstream raw attempt also failed. Directory=${firmwareDir}")
+                }
+                def chosen = candidates.sort { -it.length() }[0]
+                primarySource = 'fallbackBios'
+                logger.warn("[archive] WARNING: Using BIOS/OVMF fallback ${chosen.name} (${chosen.length()} bytes) instead of missing ${firmwareFile.name}; variable store / persistence may differ.")
+                try {
+                    java.nio.file.Files.copy(chosen.toPath(), firmwareFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                    logger.lifecycle("[archive] Fallback copied to ${firmwareFile.name}")
+                } catch (Throwable t) {
+                    throw new GradleException("[archive] Failed to create fallback primary firmware file: ${t.message}", t)
+                }
+            }
+        }
+        // Post acquisition hash verify (skip if fallback BIOS and hash provided for QEMU_VARS)
+        if (expectedSha256 && firmwareFile.exists() && primarySource != 'fallbackBios') {
+            def actual = computeSha256(firmwareFile)
+            if (!actual?.equalsIgnoreCase(expectedSha256)) {
+                firmwareFile.delete()
+                throw new GradleException("[archive] Firmware SHA-256 mismatch after ${primarySource} acquisition. Expected=${expectedSha256} Actual=${actual}")
+            }
+            logger.lifecycle("[archive] Firmware SHA-256 verified for primary (${primarySource}).")
+        } else if (expectedSha256 && primarySource == 'fallbackBios') {
+            logger.warn("[archive] Skipping provided hash verification because fallback BIOS file was used (hash intended for QEMU_VARS).")
+        }
+        // Enrich inventory with primarySource
+        try {
+            def invFile = new File(firmwareDir, 'firmware-inventory.json')
+            if (invFile.exists()) {
+                def parsed = new groovy.json.JsonSlurper().parseText(invFile.text)
+                if (parsed instanceof Map) {
+                    parsed.primarySource = primarySource
+                    if (parsed.files instanceof List) {
+                        def entry = parsed.files.find { it.name == firmwareFile.name }
+                        if (!entry) {
+                            parsed.files << [ name: firmwareFile.name, size: firmwareFile.length(), sha256: computeSha256(firmwareFile), source: primarySource ]
+                        } else {
+                            entry.size = firmwareFile.length()
+                            entry.sha256 = computeSha256(firmwareFile)
+                            entry.source = primarySource
+                        }
+                    }
+                    invFile.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(parsed))
+                    logger.lifecycle("[archive] Inventory updated with primarySource=${primarySource}")
+                }
+            }
+        } catch (Throwable t) {
+            logger.warn("[archive] Failed updating inventory with primarySource: ${t.message}")
         }
         return // short-circuit direct download logic
     }

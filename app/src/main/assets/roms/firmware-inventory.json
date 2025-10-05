@@ -1,0 +1,33 @@
+{
+    "archiveUrl": "https://github.com/xoureldeen/Vectras-VM-Android/releases/download/v2.9.3/vectras-vm-arm64-v8a.tar.gz",
+    "archiveSha256": null,
+    "architecture": "arm64",
+    "primarySource": "upstreamRaw",
+    "generatedAtUtc": "2025-10-05T08:43:19Z",
+    "files": [
+        {
+            "name": "bios.bin",
+            "size": 131072,
+            "sha256": "8244f3e5eaca828cc0a6a963f1fad15d68d8d3c0b5c80b8451b3067a85f14ae1",
+            "source": "archive"
+        },
+        {
+            "name": "bios-256k.bin",
+            "size": 262144,
+            "sha256": "f1d4f396011197eb989029659cde250751cc711c336b8fbbe6f77cfe0dc5dcd8",
+            "source": "archive"
+        },
+        {
+            "name": "bios-microvm.bin",
+            "size": 131072,
+            "sha256": "42780e1ab9161752848475529a25c39d7c76baee82a1b2ddff666c2f7de7bbee",
+            "source": "archive"
+        },
+        {
+            "name": "QEMU_VARS-default.img",
+            "size": 67108864,
+            "sha256": "3b6a07d0d404fab4e23b6d34bc6696a6a312dd92821332385e5af7c01c421351",
+            "source": "upstreamRaw"
+        }
+    ]
+}
