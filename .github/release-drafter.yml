@@ -4,28 +4,28 @@ change-template: '- $TITLE (#$NUMBER) by @$AUTHOR'
 no-changes-template: 'No user-facing changes in this cycle.'
 
 categories:
-  - title: '� Breaking Changes'
+  - title: 'Breaking Changes'
     labels: [ breaking ]
-  - title: '✨ Features'
+  - title: 'Features'
     labels: [ enhancement, feature, feat ]
-  - title: '� Fixes'
+  - title: 'Fixes'
     labels: [ bugfix, fix ]
-  - title: '� Infrastructure'
+  - title: 'Infrastructure'
     labels: [ infra, build, size, lfs, chore ]
-  - title: '� Documentation'
+  - title: 'Documentation'
     labels: [ documentation, docs ]
-  - title: '♿ Accessibility'
+  - title: 'Accessibility'
     labels: [ accessibility ]
-  - title: '🧪 Tests'
+  - title: 'Tests'
     labels: [ test ]
-  - title: '⚙️ CI/CD'
+  - title: 'CI/CD'
     labels: [ ci ]
 
 exclude-labels: [ skip-changelog ]
 
 template: |
   ## Release Summary
-  Refer to `RELEASE_NOTES_DRAFT.md` for the curated infrastructure overview.
+  Automated draft of merged changes.
 
   ## Changes
   $CHANGES
@@ -85,6 +85,6 @@ autolabeler:
       - '/^docs?/i'
   - label: breaking
     title:
-      - '!'  # exclamation mark in title convention
+      - '!'
 
 replacers: []
