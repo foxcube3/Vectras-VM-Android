@@ -1,0 +1,25 @@
+name: Release Drafter
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
+  workflow_dispatch:
+
+permissions:
+  contents: write        # to update release drafts
+  pull-requests: write   # to read PR labels/titles for autolabeler
+
+concurrency:
+  group: release-drafter-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Release Drafter
+        uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
