@@ -181,6 +181,24 @@ If CI or local workflows stage the file another way:
 
 ### Manual Invocation
 
+### Firmware Configuration Matrix
+
+| Purpose | Gradle Property | Environment Variable | Example |
+|---------|-----------------|----------------------|---------|
+| Primary firmware URL | `firmwareUrl` | `QEMU_VARS_URL` | `-PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img` |
+| Primary firmware SHA-256 | `firmwareSha256` | `QEMU_VARS_SHA256` | `-PfirmwareSha256=3d4c2...e9f0a` |
+| Primary firmware signature URL (detached .sig) | `firmwareSigUrl` | `QEMU_VARS_SIG_URL` | `-PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig` |
+| Variant selection | `firmwareVariant` | `QEMU_VARS_VARIANT` | `-PfirmwareVariant=debug` |
+| Retry attempts | `firmwareAttempts` | `QEMU_VARS_ATTEMPTS` | `-PfirmwareAttempts=5` |
+| Skip fetch (use pre-provided file) | `skipFirmware` (flag) | — | `-PskipFirmware` |
+| Skip verification | `skipFirmwareVerify` (flag) | — | `-PskipFirmwareVerify` |
+| Force re-download | `forceFirmware` (flag) | — | `-PforceFirmware` |
+| Allow sample placeholder SHA (suppress warning) | `allowSampleFirmwareSha` (flag) | — | `-PallowSampleFirmwareSha` |
+| Multi-asset URL override | `asset.<BASE>.url` | `<BASE>_URL` | `-Passet.RELEASEX64_OVMF_VARS.url=https://.../RELEASEX64_OVMF_VARS-default.fd` |
+| Multi-asset SHA override | `asset.<BASE>.sha256` | `<BASE>_SHA256` | `-Passet.RELEASEX64_OVMF_VARS.sha256=<sha>` |
+
+All hashes expected as lowercase hex. Flags are presence-based (value ignored).
+
 Just fetch (default variant):
 
 ```bash
@@ -221,6 +239,34 @@ On mismatch the file is deleted and the build fails, preventing stale/incomplete
 - Optionally supply a detached GPG signature URL (`-PfirmwareSigUrl` or `QEMU_VARS_SIG_URL`) and run `:app:verifyFirmwareSignature`.
 - Prefer HTTPS and stable, versioned URLs.
 - Rotate / invalidate compromised assets by changing URL + hash.
+
+#### Signature Verification (Optional)
+
+1. Generate a detached signature for the exact firmware binary you intend to distribute:
+
+   ```bash
+   gpg --armor --detach-sign --output QEMU_VARS-default.img.sig QEMU_VARS-default.img
+   ```
+
+1. Host both `QEMU_VARS-default.img` and `QEMU_VARS-default.img.sig` (same directory recommended).
+
+1. Provide the signature location via either:
+
+   - Environment: `QEMU_VARS_SIG_URL=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
+   - Property: `-PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
+
+1. Run (locally / CI):
+
+   ```bash
+   ./gradlew :app:verifyFirmwareSignature \
+     -PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img \
+     -PfirmwareSha256=<real_sha256> \
+     -PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig
+   ```
+
+1. Ensure the correct public key is imported in the CI environment (e.g., `gpg --import public-key.asc`).
+
+If signature URL is absent the signature step is skipped gracefully.
 
 ### CI
 

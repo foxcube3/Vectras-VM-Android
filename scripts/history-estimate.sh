@@ -24,3 +24,23 @@ join largest-shas-sorted.txt rev-list-sorted.txt | while read -r line; do
   echo "${size} ${sha} ${path}" >> history-estimate.txt
 done
 echo "Done. See history-estimate.txt"
+echo "Generating HISTORY_IMPACT_REPORT.md markdown summary"
+{
+  echo "# History Impact Report"
+  echo "Generated: $(date -u +%FT%TZ)"
+  echo
+  echo "## Pack Statistics"
+  echo '```'
+  git count-objects -v
+  echo '```'
+  echo
+  echo "## Top ${TOP} Largest Blobs (bytes sha path)"
+  echo '```'
+  join largest-shas-sorted.txt rev-list-sorted.txt | while read -r line; do
+    sha=$(echo "$line" | awk '{print $1}')
+    size=$(grep "^${sha} " largest-blobs.txt | awk '{print $2}')
+    path=$(echo "$line" | cut -d' ' -f2-)
+    echo "${size} ${sha} ${path}"
+  done
+  echo '```'
+} > HISTORY_IMPACT_REPORT.md

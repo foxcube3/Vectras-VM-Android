@@ -30,3 +30,4 @@ jobs:
             history-estimate.txt
             largest-blobs.txt
             largest-mapped.txt
+            HISTORY_IMPACT_REPORT.md
