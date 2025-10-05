@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -93,7 +94,7 @@ import java.util.Objects;
 public class X11Activity extends AppCompatActivity implements View.OnApplyWindowInsetsListener {
     static final String ACTION_STOP = "com.vectras.vm.x11.ACTION_STOP";
 
-    public static Handler handler = new Handler();
+    public static Handler handler = new Handler(Looper.getMainLooper());
     FrameLayout frm;
     private TouchInputHandler mInputHandler;
     private ICmdEntryInterface service = null;

@@ -32,6 +32,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.provider.DocumentsContract;
 import android.util.Log;
@@ -850,7 +851,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         activity.showProgressDialog(activity.getString(R.string.booting_up));
-        Handler handler = new Handler();
+    Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(
                 () -> {
                     if (ServiceUtils.isServiceRunning(activity, MainService.class)) {
@@ -873,7 +874,7 @@ public class MainActivity extends AppCompatActivity {
                             appbar.setExpanded(true);
                             activity.progressDialog.dismiss();
                         } else {
-                            Handler handler1 = new Handler();
+                            Handler handler1 = new Handler(Looper.getMainLooper());
                             handler1.postDelayed(
                                     new Runnable() {
                                         public void run() {
@@ -890,7 +891,7 @@ public class MainActivity extends AppCompatActivity {
                         // activity.startActivity(new Intent(activity,
                         // RemoteCanvasActivity.class));
                     } else if (MainSettingsManager.getVmUi(activity).equals("X11")) {
-                        Handler handler1 = new Handler();
+                        Handler handler1 = new Handler(Looper.getMainLooper());
                         handler1.postDelayed(
                                 new Runnable() {
                                     public void run() {

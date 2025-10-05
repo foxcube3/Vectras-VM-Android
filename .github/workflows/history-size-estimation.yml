@@ -1,0 +1,33 @@
+name: History Size Estimation
+
+on:
+  workflow_dispatch:
+    inputs:
+      top:
+        description: "Top N blobs"
+        required: false
+        default: "40"
+  schedule:
+    - cron: '0 3 * * 0'
+
+jobs:
+  estimate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run estimation (bash)
+        run: |
+          chmod +x scripts/history-estimate.sh
+          ./scripts/history-estimate.sh "${{ github.event.inputs.top || '40' }}"
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: history-size-report
+          path: |
+            history-estimate.txt
+            largest-blobs.txt
+            largest-mapped.txt
+            HISTORY_IMPACT_REPORT.md

@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.Preference;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -625,5 +626,5 @@ public class LoriePreferences extends AppCompatActivity {
         }
     }
 
-    static Handler handler = new Handler();
+    static Handler handler = new Handler(Looper.getMainLooper());
 }

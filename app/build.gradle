@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
 }
 
 android {
@@ -29,6 +29,26 @@ android {
         viewBinding true
         dataBinding true
     }
+    // ABI splits: default only arm64-v8a (native lib present). Enable all with -PallAbis
+    splits {
+        abi {
+            enable true
+            reset()
+            if (project.hasProperty('allAbis')) {
+                include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+                universalApk true
+            } else {
+                include 'arm64-v8a'
+                universalApk false
+            }
+        }
+    }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging false
+        }
+    }
+    // (Optional) specify ndkVersion for deterministic native builds; left unset to use default.
     lint {
         // Create a baseline for the existing lint warnings/errors so the build is not blocked.
         // Run `./gradlew updateLintBaseline` once to generate `lint-baseline.xml` and commit it.
@@ -48,7 +68,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.material
-    implementation 'androidx.preference:preference:1.2.0' // not yet moved to catalog
+    implementation libs.preference
     implementation libs.constraintlayout
     implementation libs.lottie
     implementation project(':terminal-view')
@@ -57,9 +77,10 @@ dependencies {
     implementation libs.retrofit.gson
     implementation libs.guava
     implementation libs.ztzip
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0' // could be added to catalog
+    implementation libs.swiperefreshlayout
     implementation libs.activity.ktx
     implementation libs.recyclerview
+    // (Legacy explicit versions block from master removed in favor of version catalog above)
 }
 
 // --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------
@@ -89,6 +110,10 @@ def firmwareFile = firmwareFiles[0]
 
 def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv(primaryAsset.envUrl) ?: "https://example.com/path/to/${primaryAsset.base}-${firmwareVariant}.${primaryAsset.ext}")
 def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv(primaryAsset.envSha))
+def sampleShaPlaceholder = '3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a'
+if (expectedSha256 && expectedSha256.equalsIgnoreCase(sampleShaPlaceholder) && !project.hasProperty('allowSampleFirmwareSha')) {
+    logger.warn("WARNING: Using sample placeholder firmware SHA-256. Replace with production value or pass -PallowSampleFirmwareSha to suppress this warning.")
+}
 def maxAttempts = (project.findProperty('firmwareAttempts') ?: System.getenv('QEMU_VARS_ATTEMPTS') ?: '3') as int
 def skipFirmware = project.hasProperty('skipFirmware')
 def skipFirmwareVerify = project.hasProperty('skipFirmwareVerify')
@@ -170,6 +195,11 @@ tasks.register('fetchFirmware') {
                     if (cachedEtag) {
                         conn.setRequestProperty('If-None-Match', cachedEtag)
                     }
+                    int code = conn.getResponseCode()
+                    if (code == 304) {
+                        logger.lifecycle("[attempt ${attempt}] Remote reports Not Modified (ETag match); skipping download body.")
+                        return
+                    }
                     conn.inputStream.withCloseable { input ->
                         tmp.withOutputStream { out ->
                             byte[] buf = new byte[1 * 1024 * 1024]
@@ -226,6 +256,55 @@ tasks.register('fetchFirmware') {
     }
 }
 
+// --- Optional GPG signature verification (detached .sig) -----------------------------
+// Provide -PfirmwareSigUrl or env QEMU_VARS_SIG_URL for primary asset. Requires gpg in PATH.
+def firmwareSigUrl = (project.findProperty('firmwareSigUrl') ?: System.getenv('QEMU_VARS_SIG_URL'))
+def firmwareSigFile = file("${firmwareFile}.sig")
+
+tasks.register('fetchFirmwareSignature') {
+    description = 'Fetches detached GPG signature for primary firmware if firmwareSigUrl provided.'
+    group = 'vectras'
+    onlyIf { firmwareSigUrl && !skipFirmware }
+    doLast {
+        logger.lifecycle("Downloading signature from ${firmwareSigUrl}")
+        def url = new URL(firmwareSigUrl)
+        url.openConnection().with { c ->
+            c.connectTimeout = 10000
+            c.readTimeout = 60000
+            c.inputStream.withCloseable { input ->
+                firmwareSigFile.withOutputStream { out -> out << input }
+            }
+        }
+        logger.lifecycle("Signature saved: ${firmwareSigFile} (${firmwareSigFile.length()} bytes)")
+    }
+}
+
+tasks.register('verifyFirmwareSignature') {
+    description = 'Verifies firmware GPG signature (requires gpg and fetched signature).'
+    group = 'verification'
+    dependsOn 'fetchFirmware', 'fetchFirmwareSignature'
+    onlyIf { firmwareSigUrl && !skipFirmware }
+    doLast {
+        if (!firmwareSigFile.exists()) throw new GradleException("Signature file missing: ${firmwareSigFile}")
+        logger.lifecycle("Verifying signature via gpg --verify ...")
+        def proc = [ 'gpg', '--verify', firmwareSigFile.absolutePath, firmwareFile.absolutePath ].execute()
+        def out = new StringBuffer(); def err = new StringBuffer();
+        proc.consumeProcessOutput(out, err)
+        proc.waitFor()
+        logger.lifecycle(out.toString())
+        if (proc.exitValue() != 0) {
+            logger.error(err.toString())
+            throw new GradleException("Firmware signature verification failed (exit=${proc.exitValue()})")
+        }
+        logger.lifecycle("Firmware signature verified successfully.")
+    }
+}
+
+tasks.register('ciAllFirmwareSecureCheck') {
+    description = 'CI: fetch all assets + verify primary hash + signature if provided + print hash.'
+    group = 'verification'
+    dependsOn 'fetchAllFirmware', 'verifyFirmware', 'printFirmwareSha256', 'verifyFirmwareSignature'
+}
 tasks.register('verifyFirmware') {
     description = 'Verifies existing firmware file matches expected SHA-256 (if provided).'
     group = 'vectras'
@@ -364,12 +443,79 @@ tasks.register('ciFirmwareCheck') {
     dependsOn tasks.named('verifyFirmware'), tasks.named('printFirmwareSha256')
 }
 
+// Lightweight guard assertion (non-fatal) to help ensure sample SHA not shipped accidentally.
+tasks.register('assertNoSampleFirmwareSha') {
+    group = 'verification'
+    description = 'Fails if the sample placeholder firmware SHA is still configured (unless allow flag present).'
+    doLast {
+        if (expectedSha256 && expectedSha256.equalsIgnoreCase(sampleShaPlaceholder) && !project.hasProperty('allowSampleFirmwareSha')) {
+            throw new GradleException("Sample placeholder firmware SHA in use. Replace with production value or run with -PallowSampleFirmwareSha if intentional.")
+        } else if (expectedSha256?.equalsIgnoreCase(sampleShaPlaceholder)) {
+            logger.lifecycle("Sample SHA allowed explicitly via -PallowSampleFirmwareSha.")
+        } else {
+            logger.lifecycle("No sample firmware SHA detected.")
+        }
+    }
+}
+
+// Composite quality gate bundling all relevant firmware checks.
+tasks.register('firmwareQualityGate') {
+    group = 'verification'
+    description = 'Fetch all firmware, verify primary hash, optional signature, print hash, and assert sample SHA not used.'
+    dependsOn 'ciAllFirmwareSecureCheck', 'assertNoSampleFirmwareSha'
+}
 // Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {
     if (!skipFirmware) {
         dependsOn tasks.named('fetchFirmware')
     } else {
         logger.lifecycle('Skipping firmware fetch due to -PskipFirmware flag.')
+    }
+}
+
+// Minimal environment validation task (no firmware download) for CI quick-check
+tasks.register('envCheck') {
+    group = 'verification'
+    description = 'Validates essential environment: SDK path, Java version, gradle plugin versions; skips firmware.'
+    doLast {
+        // Basic SDK detection replicating scripts/check-env logic
+        def sdkDir = null
+        def localProps = file('../local.properties')
+        if (localProps.exists()) {
+            def line = localProps.readLines().find { it.startsWith('sdk.dir=') }
+            if (line) sdkDir = line.substring('sdk.dir='.length())
+        }
+        if (!sdkDir) sdkDir = System.getenv('ANDROID_HOME')
+        if (!sdkDir) sdkDir = System.getenv('ANDROID_SDK_ROOT')
+        if (!sdkDir) {
+            throw new GradleException('envCheck: Android SDK path not found (local.properties sdk.dir or ANDROID_HOME / ANDROID_SDK_ROOT required).')
+        }
+        if (!file(sdkDir).exists()) {
+            throw new GradleException("envCheck: Android SDK directory does not exist: ${sdkDir}")
+        }
+        logger.lifecycle("envCheck: SDK directory = ${sdkDir}")
+
+        // Java version (should be 17+ for current toolchain)
+        def javaVersion = org.gradle.internal.jvm.Jvm.current().javaVersion
+        if (javaVersion < JavaVersion.VERSION_17) {
+            throw new GradleException("envCheck: Java 17+ required. Detected: ${javaVersion}")
+        }
+        logger.lifecycle("envCheck: Java version = ${javaVersion}")
+
+        // Assert critical plugins are on expected versions (best-effort)
+        def agp = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+        logger.lifecycle("envCheck: Android Gradle Plugin version = ${agp}")
+
+        // If signature verification is requested, ensure gpg is available
+        def sigRequested = (project.findProperty('firmwareSigUrl') ?: System.getenv('QEMU_VARS_SIG_URL'))
+        if (sigRequested) {
+            def gpgOk = ['gpg','--version'].execute()
+            gpgOk.waitForOrKill(5000)
+            if (gpgOk.exitValue() != 0) {
+                throw new GradleException('envCheck: gpg not found on PATH but firmware signature URL provided.')
+            }
+            logger.lifecycle('envCheck: gpg available for signature verification.')
+        }
     }
 }
 

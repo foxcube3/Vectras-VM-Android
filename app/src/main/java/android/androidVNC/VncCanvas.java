@@ -28,7 +28,7 @@
 package android.androidVNC;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -38,6 +38,7 @@ import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -89,7 +90,7 @@ public class VncCanvas extends AppCompatImageView {
 	public RfbProto rfb;
 	// Internal bitmap data
 	AbstractBitmapData bitmapData;
-	public Handler handler = new Handler();
+	public Handler handler = new Handler(Looper.getMainLooper());
 	// VNC Encoding parameters
 	private boolean useCopyRect = false; // TODO CopyRect is not working
 	private int preferredEncoding = -1;
@@ -154,28 +155,18 @@ public class VncCanvas extends AppCompatImageView {
         setOnGenericMotionListener(new VNCGenericMotionListener_API12());
         setOnTouchListener(new VNCOnTouchListener());
 
-		// Startup the RFB thread with a nifty progess dialog
-		final ProgressDialog pd = new ProgressDialog(getContext(), R.style.MainDialogTheme);
-		pd.setTitle("Connecting to VM Console");
-		pd.setMessage("Please wait...");
-		pd.setIndeterminate(true);
-		pd.setCancelable(true);
-		pd.setOnCancelListener(new DialogInterface.OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				closeConnection();
-				handler.post(new Runnable() {
-					public void run() {
-						Utils.showErrorMessage(getContext(), "VNC connection aborted!");
-					}
-				});
-			}
+		// Startup the connection with a lightweight Material dialog (non-deprecated replacement for ProgressDialog)
+		final AlertDialog pd = new androidx.appcompat.app.AlertDialog.Builder(getContext(), R.style.CenteredDialogTheme)
+				.setTitle("Connecting to VM Console")
+				.setMessage("Please wait...")
+				.setCancelable(true)
+				.create();
+		pd.setOnCancelListener(dialog -> {
+			closeConnection();
+			handler.post(() -> Utils.showErrorMessage(getContext(), "VNC connection aborted!"));
 		});
-
-        // Show the ProgressDialog
-		// Did not give show to not flash.
-		//pd.show();
-		final Display display = pd.getWindow().getWindowManager().getDefaultDisplay();
+		// Intentionally not showing immediately to avoid flash; will show if connection takes longer in future enhancement.
+		final Display display = ((android.view.WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
 		Thread t = new Thread() {
 
 			public void run() {
@@ -362,7 +353,7 @@ public class VncCanvas extends AppCompatImageView {
 		}
 	}
 
-	public void processNormalProtocol(final Context context, ProgressDialog pd, final Runnable setModes)
+	public void processNormalProtocol(final Context context, AlertDialog pd, final Runnable setModes)
 			throws Exception {
 		try {
 			bitmapData.writeFullUpdateRequest(false);

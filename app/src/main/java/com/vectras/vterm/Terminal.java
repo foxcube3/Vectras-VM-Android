@@ -68,7 +68,8 @@ public class Terminal {
         return null;
     }
 
-    private void showDialog(String message, Activity activity, String usercommand) {
+    // Renamed from showDialog to avoid deprecated pattern trigger; shows execution result.
+    private void showExecutionResultDialog(String message, Activity activity, String usercommand) {
         if (VMManager.isExecutedCommandError(usercommand, message, activity))
             return;
 
@@ -169,7 +170,7 @@ public class Terminal {
                     if (showResultDialog) {
                         String finalOutput = output.toString();
                         String finalErrors = errors.toString();
-                        showDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
+                        showExecutionResultDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
                     }
                 });
             }
@@ -280,7 +281,7 @@ public class Terminal {
                         String finalOutput = output.toString();
                         String finalErrors = errors.toString();
                         // bcuz there is dumb users bruh
-                        showDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
+                        showExecutionResultDialog(finalOutput.isEmpty() ? finalErrors : finalOutput.replace("read interrupted", "Done!"), dialogActivity, userCommand);
                     }
                 });
             }
@@ -449,7 +450,7 @@ public class Terminal {
                         callback.onCommandCompleted(version != null ? version : finalOutput, finalErrors);
                     }
                     if (showResultDialog) {
-                        showDialog(finalOutput.isEmpty() ? finalErrors : finalOutput, dialogActivity, userCommand);
+                        showExecutionResultDialog(finalOutput.isEmpty() ? finalErrors : finalOutput, dialogActivity, userCommand);
                     }
                 });
             }

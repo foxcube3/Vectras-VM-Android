@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -217,7 +218,7 @@ public class MainSettingsManager extends AppCompatActivity
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mHandler = new Handler();
+            mHandler = new Handler(Looper.getMainLooper());
             Preference pref = findPreference("modeNight");
             if (pref != null) {
                 pref.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -280,7 +281,7 @@ public class MainSettingsManager extends AppCompatActivity
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mHandler = new Handler();
+            mHandler = new Handler(Looper.getMainLooper());
 
             //Preference prefIfType = findPreference("ifType");
             //if (getArch(activity).equals("ARM64"))

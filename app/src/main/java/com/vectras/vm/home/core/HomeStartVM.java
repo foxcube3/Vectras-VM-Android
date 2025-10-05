@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -107,7 +108,7 @@ public class HomeStartVM {
         }
 
         showProgressDialog(activity, activity.getString(R.string.booting_up));
-        Handler handler = new Handler();
+    Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(
                 () -> {
                     if (ServiceUtils.isServiceRunning(activity, MainService.class)) {
@@ -131,7 +132,7 @@ public class HomeStartVM {
                             if (appbar != null) appbar.setExpanded(true);
                             progressDialog.dismiss();
                         } else {
-                            Handler handler1 = new Handler();
+                            Handler handler1 = new Handler(Looper.getMainLooper());
                             handler1.postDelayed(
                                     () -> {
                                         MainVNCActivity.started = true;
@@ -145,7 +146,7 @@ public class HomeStartVM {
 //                    } else if (MainSettingsManager.getVmUi(activity).equals("SPICE")) {
 //                        //This feature is not available yet.
                     } else if (MainSettingsManager.getVmUi(activity).equals("X11")) {
-                        Handler handler1 = new Handler();
+                        Handler handler1 = new Handler(Looper.getMainLooper());
                         handler1.postDelayed(
                                 () -> {
                                     progressDialog.dismiss();

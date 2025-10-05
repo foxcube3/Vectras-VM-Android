@@ -1,3 +1,6 @@
+#############################################
+# General Android / Gradle ignore patterns  #
+#############################################
 # Built application files
 *.apk
 *.aar
@@ -34,7 +37,7 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# IntelliJ
+# IntelliJ / Android Studio project files
 *.iml
 .idea/workspace.xml
 .idea/tasks.xml
@@ -44,15 +47,14 @@ captures/
 .idea/libraries
 .idea/caches
 .idea/modules.xml
-# Comment next line if keeping position of elements in Navigation Editor is relevant for you
+# Comment next line if keeping position of elements in Navigation Editor matters
 .idea/navEditor.xml
 
-# Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
+# Keystore files (uncomment if you do NOT want to commit them)
 #*.jks
 #*.keystore
 
-# External native build folder generated in Android Studio 2.2 and later
+# External native build folders
 .externalNativeBuild
 .cxx/
 
@@ -74,11 +76,12 @@ fastlane/readme.md
 # Version control
 vcs.xml
 
-# lint
+# Lint outputs
 lint/intermediates/
 lint/generated/
 lint/outputs/
 lint/tmp/
+# lint/reports/  # (uncomment if you want to ignore reports as well)
 
 # Misc
 README.html
@@ -86,3 +89,36 @@ README.html
 # Environment files (sensitive)
 .env
 .env.*
+
+# Temporary mirror / analysis artifacts
+mirror-temp.git/
+*.pack
+*.idx
+
+# History rewrite / analysis & sizing artifacts (not intended for version control)
+all-tracked.txt
+git-objects.txt
+git-objects-details.txt
+git-tracked-files.txt
+rev-list.txt
+rev-list-all.txt
+large-blobs.txt
+large-blob-paths.txt
+large-blob-top10-mapping.txt
+large-shas.txt
+mirror-large-objects.txt
+mirror-large-objects-raw.txt
+mirror-largest-trimmed.txt
+hist_qemu_vars.txt
+shas.txt
+so-files.txt
+tracked-img.txt
+tracked-so.txt
+tracked-*.txt
+lfs-targets.txt
+verify-pack.txt
+pr-body.txt
+pr-body-current.txt
+pr-body-history-followup.txt
+collect-git-objects.ps1
+find-large-blobs.ps1

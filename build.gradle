@@ -1,37 +1,33 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.2'
-        classpath 'com.google.gms:google-services:4.4.3'
-        // Firebase Crashlytics Gradle plugin
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.8'
-    }
-}
+// Replaced legacy buildscript/classpath with version catalog plugin aliases (see settings.gradle)
 
-allprojects {
-    repositories {
-        mavenCentral()
-        google()
-    }
-}
+// Repositories defined centrally in settings.gradle via dependencyResolutionManagement; removing per-project repositories block to satisfy FAIL_ON_PROJECT_REPOS.
 
-// Force consistent Kotlin stdlib versions to avoid duplicate-class errors between 1.6.x and 1.8.x
+// Force consistent Kotlin stdlib version across modules
 subprojects {
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
                 details.useVersion '1.8.10'
             }
         }
     }
+
+    // Optional: enable deprecation/unchecked warnings when invoked with -PenableDeprecationLint
+    tasks.withType(JavaCompile).configureEach { task ->
+        if (project.hasProperty('enableDeprecationLint')) {
+            options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
+            options.warnings = true
+        }
+    }
 }
 
 ext {
-    toolsVersion = properties.get('TOOLS_VERSION', '35.0.0')
-    compileApi = properties.get('COMPILE_API', 36)
-    targetApi = properties.get('TARGET_API', 36)
-    minApi = properties.get('MIN_API', 26) // Increased to 26
+    // Switched to stable API 34 per request (was preview 36). Override via -PCOMPILE_API / -PTARGET_API / -PTOOLS_VERSION if needed.
+    toolsVersion = properties.get('TOOLS_VERSION', '34.0.0')
+    compileApi = properties.get('COMPILE_API', 34)
+    targetApi = properties.get('TARGET_API', 34)
+    minApi = properties.get('MIN_API', 26) // Increased earlier to 26
 }
+
+// Apply custom deprecated API scan plugin (implementation in buildSrc)
+apply plugin: 'com.vectras.deprecated-scan'
