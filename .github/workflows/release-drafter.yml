@@ -18,6 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Verify config exists
         run: |
           test -f .github/release-drafter.yml || { echo 'Config missing'; exit 1; }

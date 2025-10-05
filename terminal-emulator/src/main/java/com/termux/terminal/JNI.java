@@ -38,4 +38,7 @@ final class JNI {
     /** Close a file descriptor through the close(2) system call. */
     public static native void close(int fileDescriptor);
 
+    /** Send a POSIX signal (e.g. SIGINT=2, SIGTERM=15) to a subprocess pid. Returns 0 on success, -1 on failure. */
+    public static native int sendSignal(int processId, int signal);
+
 }
