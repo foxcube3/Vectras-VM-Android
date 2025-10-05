@@ -438,6 +438,13 @@ tasks.register('assertNoSampleFirmwareSha') {
     }
 }
 
+// Composite quality gate bundling all relevant firmware checks.
+tasks.register('firmwareQualityGate') {
+    group = 'verification'
+    description = 'Fetch all firmware, verify primary hash, optional signature, print hash, and assert sample SHA not used.'
+    dependsOn 'ciAllFirmwareSecureCheck', 'assertNoSampleFirmwareSha'
+}
+
 // Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {
     if (!skipFirmware) {
