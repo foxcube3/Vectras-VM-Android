@@ -96,3 +96,31 @@ mirror-temp.git/
 *.pack
 *.idx
 
+# History rewrite / analysis & sizing artifacts (not intended for version control)
+all-tracked.txt
+git-objects.txt
+git-objects-details.txt
+git-tracked-files.txt
+rev-list.txt
+rev-list-all.txt
+large-blobs.txt
+large-blob-paths.txt
+large-blob-top10-mapping.txt
+large-shas.txt
+mirror-large-objects.txt
+mirror-large-objects-raw.txt
+mirror-largest-trimmed.txt
+hist_qemu_vars.txt
+shas.txt
+so-files.txt
+tracked-img.txt
+tracked-so.txt
+tracked-*.txt
+lfs-targets.txt
+verify-pack.txt
+pr-body.txt
+pr-body-current.txt
+pr-body-history-followup.txt
+collect-git-objects.ps1
+find-large-blobs.ps1
+
