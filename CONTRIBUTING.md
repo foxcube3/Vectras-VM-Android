@@ -37,6 +37,55 @@ If you intentionally remove issues and want the baseline updated:
 ./gradlew updateLintBaseline
 ```
 
+## Deprecated API Scan & Baseline
+
+We enforce a zero baseline for a small set of deprecated Android API patterns (see README section "Deprecated API Modernization & Scan"). The task runs automatically during CI and locally when you invoke `check`.
+
+Run manually:
+
+```bash
+./gradlew deprecatedApiScan -PskipFirmware
+```
+
+Fail build if any active findings (should normally be zero):
+
+```bash
+./gradlew deprecatedApiScan -PfailOnDeprecated
+```
+
+Update (accept) current findings into `deprecation-baseline.txt` (only do this with strong justification; include reasoning in your PR description):
+
+```bash
+./gradlew deprecatedApiScan -PupdateDeprecationBaseline
+```
+
+Emit machine-readable JSON report:
+
+```bash
+./gradlew deprecatedApiScan -PjsonReport
+```
+
+Include Kotlin sources (future-proof flag; only needed once Kotlin is added):
+
+```bash
+./gradlew deprecatedApiScan -PscanKotlin
+```
+
+Guidelines:
+
+- Keep the baseline empty. Treat new matches as regressions to fix, not to baseline.
+- If you must baseline (e.g., temporarily landing a large refactor in stages), explain clearly in the PR why and add a follow-up issue to remove it.
+- Avoid adding broad patterns; keep regexes narrowly focused on actual deprecated constructs (constructors or signatures) to minimize noise.
+
+Extending the scan:
+
+1. Add a new regex in the `patterns` map in root `build.gradle`.
+2. Run `./gradlew deprecatedApiScan -PjsonReport` and review the findings.
+3. If legitimate usages exist that cannot be removed immediately, either fix them or (rarely) baseline them with justification.
+4. Update README/this section if the scope of enforced deprecations changes.
+
+If the task grows significantly consider migrating logic into a small `buildSrc` plugin module with unit tests (see TODO in root build file).
+
 ## Pull Requests
 * Keep PRs focused (one logical change set).
 * Ensure `./gradlew assembleDebug -PskipFirmware` succeeds locally.

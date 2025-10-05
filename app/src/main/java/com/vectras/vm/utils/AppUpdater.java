@@ -1,6 +1,6 @@
 package com.vectras.vm.utils;
 
-import android.app.ProgressDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import com.vectras.vm.AppConfig;
@@ -14,7 +14,7 @@ public class AppUpdater extends AsyncTask<String, String, String> {
 
     private Context context;
     private OnUpdateListener listener;
-    private ProgressDialog progressDialog;
+    private AlertDialog progressDialog;
     private boolean isOnCreate;
 	
     public AppUpdater(Context context, OnUpdateListener listener) {
@@ -63,11 +63,12 @@ public class AppUpdater extends AsyncTask<String, String, String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if (isOnCreate) {
-            progressDialog = new ProgressDialog(context, R.style.MainDialogTheme);
-            progressDialog.setMessage("Please wait for the check");
-            progressDialog.setTitle("Looking for Update");
-            progressDialog.setCancelable(false);
+        if (isOnCreate && context != null) {
+            progressDialog = new AlertDialog.Builder(context, R.style.CenteredDialogTheme)
+                    .setTitle("Looking for Update")
+                    .setMessage("Please wait for the check")
+                    .setCancelable(false)
+                    .create();
             progressDialog.show();
         }
     }

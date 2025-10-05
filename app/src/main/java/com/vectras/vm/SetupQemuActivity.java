@@ -10,7 +10,7 @@ import static com.vectras.vm.utils.UIUtils.UIAlert;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ProgressDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Intent;
@@ -227,10 +227,11 @@ public class SetupQemuActivity extends AppCompatActivity implements View.OnClick
         String extractedFilePath = filesDir + "/" + abi + ".tar";
         //String apkLoaderextractedFilePath = TermuxService.PREFIX_PATH + "/libexec/termux-x11/loader.apk";
 
-        ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setMessage("Extracting data...");
-        progressDialog.setCancelable(false);
-        progressDialog.show();
+    AlertDialog progressDialog = new AlertDialog.Builder(this, R.style.CenteredDialogTheme)
+        .setMessage("Extracting data...")
+        .setCancelable(false)
+        .create();
+    progressDialog.show();
 
         new AsyncTask<Void, Void, Boolean>() {
             String errorMessage = null;

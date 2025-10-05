@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -229,7 +230,7 @@ public class CmdEntryPoint extends ICmdEntryInterface.Stub {
         } catch (Exception e) {
             Log.e("CmdEntryPoint", "Something went wrong when preparing MainLooper", e);
         }
-        handler = new Handler();
+    handler = new Handler(Looper.getMainLooper());
         ctx = createContext();
 
         String path = "lib/" + Build.SUPPORTED_ABIS[0] + "/libXlorie.so";

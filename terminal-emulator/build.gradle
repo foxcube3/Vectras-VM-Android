@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.library'
+    alias(libs.plugins.android.library)
     id 'maven-publish'
 }
 
@@ -27,6 +27,11 @@ android {
 
     testOptions {
         unitTests.returnDefaultValues = true
+    }
+    // Enable deprecation warnings surfaced by javac
+    lintOptions {
+        // AGP < 8.4 style; for newer AGP use lint block if needed
+        warningsAsErrors false
     }
 }
 

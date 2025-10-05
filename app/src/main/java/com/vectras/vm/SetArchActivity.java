@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.Menu;
@@ -29,7 +30,7 @@ public class SetArchActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mHandler = new Handler();
+    mHandler = new Handler(Looper.getMainLooper());
         UIUtils.edgeToEdge(this);
         binding = ActivitySetArchBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

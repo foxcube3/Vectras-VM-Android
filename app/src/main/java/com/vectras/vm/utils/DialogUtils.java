@@ -19,7 +19,6 @@ import com.vectras.vm.R;
 public class DialogUtils {
 
     public static void oneDialog(Activity _context, String _title, String _message, String _textPositiveButton, boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onDismiss) {
-<<<<<<< HEAD
         View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
@@ -51,18 +50,13 @@ public class DialogUtils {
             if (_onPositive != null) _onPositive.run();
             dialog.dismiss();
         });
-
-//        dialog.setPositiveButton(_textPositiveButton, (dialog2, which) -> {
-//            if (_onPositive != null) _onPositive.run();
-//            dialog2.dismiss();
-//        });
         dialog.setOnDismissListener(dialog1 -> {
             if (_onDismiss != null) _onDismiss.run();
         });
         dialog.show();
     }
+
     public static void twoDialog(Activity _context, String _title, String _message, String _textPositiveButton, String _textNegativeButton, boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onNegative, Runnable _onDismiss) {
-<<<<<<< HEAD
         View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
@@ -99,14 +93,6 @@ public class DialogUtils {
             if (_onNegative != null) _onNegative.run();
             dialog.dismiss();
         });
-//        dialog.setPositiveButton(_textPositiveButton, (dialog2, which) -> {
-//            if (_onPositive != null) _onPositive.run();
-//            dialog2.dismiss();
-//        });
-//        dialog.setNegativeButton(_textNegativeButton, (dialog3, which) -> {
-//            if (_onNegative != null) _onNegative.run();
-//            dialog3.dismiss();
-//        });
         dialog.setOnDismissListener(dialog1 -> {
             if (_onDismiss != null) _onDismiss.run();
         });
@@ -114,7 +100,6 @@ public class DialogUtils {
     }
 
     public static void threeDialog(Activity _context, String _title, String _message, String _textPositiveButton, String _textNegativeButton, String _textNeutralButton ,boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onNegative, Runnable _onNeutral, Runnable _onDismiss) {
-<<<<<<< HEAD
         View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
@@ -155,19 +140,6 @@ public class DialogUtils {
             if (_onNeutral != null) _onNeutral.run();
             dialog.dismiss();
         });
-
-//        dialog.setPositiveButton(_textPositiveButton, (dialog2, which) -> {
-//            if (_onPositive != null) _onPositive.run();
-//            dialog2.dismiss();
-//        });
-//        dialog.setNegativeButton(_textNegativeButton, (dialog3, which) -> {
-//            if (_onNegative != null) _onNegative.run();
-//            dialog3.dismiss();
-//        });
-//        dialog.setNeutralButton(_textNeutralButton, (dialog4, which) -> {
-//            if (_onNeutral != null) _onNeutral.run();
-//            dialog4.dismiss();
-//        });
         dialog.setOnDismissListener(dialog1 -> {
             if (_onDismiss != null) _onDismiss.run();
         });

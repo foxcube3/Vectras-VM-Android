@@ -1,7 +1,6 @@
 package com.vectras.vm;
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.*;
@@ -188,8 +187,8 @@ public class StoreItemActivity extends AppCompatActivity {
 		});
 	}
 
-	public static final int DIALOG_DOWNLOAD_PROGRESS = 0;
-	private ProgressDialog mProgressDialog;
+    private AlertDialog downloadDialog;
+    private int downloadProgress = 0;
 
 	private void startDownload() {
 		//String url = link;
@@ -200,28 +199,37 @@ public class StoreItemActivity extends AppCompatActivity {
 		startActivity(i);
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case DIALOG_DOWNLOAD_PROGRESS:
-			mProgressDialog = new ProgressDialog(this, R.style.MainDialogTheme);
-			mProgressDialog.setMessage(getString(R.string.downloading_file));
-			mProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			mProgressDialog.setCancelable(false);
-			mProgressDialog.show();
-			return mProgressDialog;
-		default:
-			return null;
+	private void showDownloadDialog() {
+		if (downloadDialog != null && downloadDialog.isShowing()) return;
+		View v = getLayoutInflater().inflate(R.layout.dialog_progress_style, new android.widget.FrameLayout(this), false);
+		TextView progress_text = v.findViewById(R.id.progress_text);
+		progress_text.setText(getString(R.string.downloading_file));
+		downloadDialog = new AlertDialog.Builder(this, R.style.CenteredDialogTheme)
+				.setView(v)
+				.setCancelable(false)
+				.create();
+		downloadDialog.show();
+	}
+
+	private void updateDownloadProgress(int pct) {
+		// Could bind a ProgressBar in custom view; currently text only.
+		if (downloadDialog != null && downloadDialog.isShowing()) {
+			TextView progress_text = downloadDialog.findViewById(R.id.progress_text);
+			if (progress_text != null) progress_text.setText(getString(R.string.downloading_file) + " (" + pct + "%)");
 		}
 	}
 
-	class DownloadFileAsync extends AsyncTask<String, String, String> {
+	private void dismissDownloadDialog() {
+		if (downloadDialog != null) downloadDialog.dismiss();
+	}
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			showDialog(DIALOG_DOWNLOAD_PROGRESS);
-		}
+    class DownloadFileAsync extends AsyncTask<String, String, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showDownloadDialog();
+        }
 
 		@Override
 		protected String doInBackground(String... aurl) {
@@ -259,15 +267,18 @@ public class StoreItemActivity extends AppCompatActivity {
 
 		protected void onProgressUpdate(String... progress) {
 			Log.d(TAG, progress[0]);
-			mProgressDialog.setProgress(Integer.parseInt(progress[0]));
+			try {
+				int pct = Integer.parseInt(progress[0]);
+				updateDownloadProgress(pct);
+			} catch (NumberFormatException ignored) {}
 		}
 
-		@Override
-		protected void onPostExecute(String unused) {
-			dismissDialog(DIALOG_DOWNLOAD_PROGRESS);
-			String fileName = URLUtil.guessFileName(link,null,null);
-			DialogUtils.oneDialog(StoreItemActivity.this, getString(R.string.downloaded_successfully), getString(R.string.downloaded_to_path) + AppConfig.downloadsFolder +  fileName, getString(R.string.ok), true, R.drawable.check_24px, true, null, null);
-		}
+        @Override
+        protected void onPostExecute(String unused) {
+            dismissDownloadDialog();
+            String fileName = URLUtil.guessFileName(link,null,null);
+            DialogUtils.oneDialog(StoreItemActivity.this, getString(R.string.downloaded_successfully), getString(R.string.downloaded_to_path) + AppConfig.downloadsFolder +  fileName, getString(R.string.ok), true, R.drawable.check_24px, true, null, null);
+        }
 	}
 
 	@Override

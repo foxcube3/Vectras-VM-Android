@@ -27,7 +27,7 @@ import com.vectras.vm.R;
 
 import android.app.Activity;
 import android.app.ActivityManager.MemoryInfo;
-import android.app.Dialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -71,21 +71,8 @@ public class androidVNC extends Activity {
 		textNickname = (EditText) findViewById(R.id.textNickname);
 		textUsername = (EditText) findViewById(R.id.textUsername);
 		goButton = (Button) findViewById(R.id.buttonGO);
-		((Button) findViewById(R.id.buttonRepeater))
-				.setOnClickListener(new View.OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						showDialog(R.layout.repeater_dialog);
-					}
-				});
-		((Button) findViewById(R.id.buttonImportExport))
-				.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						showDialog(R.layout.importexport);
-					}
-				});
+		((Button) findViewById(R.id.buttonRepeater)).setOnClickListener(v -> showRepeaterDialog());
+		((Button) findViewById(R.id.buttonImportExport)).setOnClickListener(v -> showImportExportDialog());
 		colorSpinner = (Spinner) findViewById(R.id.colorformat);
 		COLORMODEL[] models = COLORMODEL.values();
 		ArrayAdapter<COLORMODEL> colorSpinnerAdapter = new ArrayAdapter<COLORMODEL>(
@@ -151,9 +138,24 @@ public class androidVNC extends Activity {
 	 * 
 	 * @see android.app.Activity#onCreateDialog(int)
 	 */
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		return new RepeaterDialog(this);
+	// Removed deprecated onCreateDialog; using direct dialog builders instead.
+
+	private void showRepeaterDialog() {
+		View view = getLayoutInflater().inflate(R.layout.repeater_dialog, null);
+		new AlertDialog.Builder(this, R.style.CenteredDialogTheme)
+				.setView(view)
+				.setCancelable(true)
+				.setPositiveButton(android.R.string.ok, (d, w) -> d.dismiss())
+				.show();
+	}
+
+	private void showImportExportDialog() {
+		View view = getLayoutInflater().inflate(R.layout.importexport, null);
+		new AlertDialog.Builder(this, R.style.CenteredDialogTheme)
+				.setView(view)
+				.setCancelable(true)
+				.setPositiveButton(android.R.string.ok, (d, w) -> d.dismiss())
+				.show();
 	}
 
 	/*

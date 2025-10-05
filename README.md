@@ -1,8 +1,6 @@
-<p align="center">
-  <img src="resources/vectrasvm.png" style="width: 30%;" />
-</p>
-
 # Vectras VM
+
+![Vectras VM logo](resources/vectrasvm.png)
 [![Ceasefire Now](https://badge.techforpalestine.org/default)](https://techforpalestine.org/learn-more)
 
 ![GitHub Repo stars](https://img.shields.io/github/stars/xoureldeen/Vectras-VM-Android)
@@ -12,6 +10,8 @@
 [![Discord server](https://img.shields.io/discord/911060166810681345)][link-discord]
 [![Telegram Channel][ico-telegram]][link-telegram]
 [![Software License][ico-license]](LICENSE)
+
+ [![Deprecated API Scan](https://github.com/foxcube3/Vectras-VM-Android/actions/workflows/deprecated-scan.yml/badge.svg)](../../actions/workflows/deprecated-scan.yml)
 
 Welcome to Vectras VM! A virtual machine app for Android based on QEMU that lets you emulate various OSes including: [![Windows](https://custom-icon-badges.demolab.com/badge/Windows-0078D6?logo=windows11&logoColor=white)](https://www.microsoft.com/en-us/windows) [![Linux](https://img.shields.io/badge/Linux-FCC624?logo=linux&logoColor=black)](https://www.linux.org/) [![macOS](https://img.shields.io/badge/macOS-000000?logo=apple&logoColor=F0F0F0)](https://www.apple.com/macos) [![Android](https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white)](https://www.android.com/).
 
@@ -34,20 +34,23 @@ Works fine on devices manufactured in 2021 or later and devices equipped with Sn
 | RedMagic      | IQOO      |
 
 ### Minimum System Requirements
+
 - Android 6.0 and up.
 - 3GB RAM (1GB of free RAM).
 - A good processor.
 
 ### Recommended System Requirements
+
 - Android 8.1 and up.
 - 8GB RAM (3GB of free RAM).
 - CPU and Android OS support 64-bit.
 - Snapdragon 855 CPU or better.
 - Integrated or removable cooling system (if running operating systems from 2010 to present).
+
 > [!TIP]
 > If the OS you are trying to emulate crashes, try using an older version.
 
-# Installation
+## Installation
 
 ### Stable Releases
 
@@ -64,14 +67,17 @@ We publish a **new beta release after every commit** — so you can always test 
 
 [![Download Beta](https://img.shields.io/badge/Download-Beta-blue?style=for-the-badge&logo=github)](https://github.com/AnBui2004/Vectras-VM-Emu-Android/releases)
 
-# Donate
+ 
+## Donate
 Help support the project by contributing!
 
 [![Buy Me A Coffee][ico-buymeacoffee]][link-buymeacoffee]
 [![Buy Me a Coffee at ko-fi.com][ico-ko-fi]][link-ko-fi]
 [![Support me on Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.vercel.app%2Fapi%3Fusername%3Dendel%26type%3Dpatrons&style=flat)](https://patreon.com/VectrasTeam)
 
-# Thanks to
+ 
+## Thanks to
+
 - [3DFX QEMU PATCH](https://github.com/kjliew/qemu-3dfx)
 - [Alpine Linux](https://www.alpinelinux.org/)
 - [Glide](https://github.com/bumptech/glide)
@@ -82,16 +88,12 @@ Help support the project by contributing!
 - [Termux](https://github.com/termux)
 
 [ico-telegram]: https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white
-[ico-discord]: https://img.shields.io/badge/Discord-%235865F2.svg?&logo=discord&logoColor=white
-[ico-version]: https://img.shields.io/badge/Android-3DDC84?logo=android&logoColor=white
 [ico-license]: https://img.shields.io/badge/License-GPL_v2-blue.svg
 [ico-buymeacoffee]: https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=black
 [ico-ko-fi]: https://img.shields.io/badge/Ko--fi-FF5E5B?logo=ko-fi&logoColor=white
 
 [link-discord]: https://discord.gg/t8TACrKSk7
 [link-telegram]: https://t.me/vectras_os
-[link-repo]: https://github.com/xoureldeen/Vectras-VM-Android/
-[link-releases]: https://github.com/xoureldeen/Vectras-VM-Android/releases/
 [link-buymeacoffee]: https://www.buymeacoffee.com/vectrasvm
 [link-ko-fi]: https://ko-fi.com/vectrasvm
 
@@ -267,6 +269,84 @@ On mismatch the file is deleted and the build fails, preventing stale/incomplete
 1. Ensure the correct public key is imported in the CI environment (e.g., `gpg --import public-key.asc`).
 
 If signature URL is absent the signature step is skipped gracefully.
+
+## Deprecated API Modernization & Scan
+
+This fork introduces an automated scan to prevent reintroduction of deprecated Android UI patterns that have been refactored away (e.g. `ProgressDialog`, `Activity.onCreateDialog(int)`, raw `new Handler()` with implicit looper).
+
+Gradle task:
+
+```bash
+./gradlew deprecatedApiScan
+```
+
+### Properties / Flags
+
+| Purpose | Property | Example |
+|---------|----------|---------|
+| Show deprecation compiler warnings | `-PenableDeprecationLint` | `./gradlew assembleDebug -PenableDeprecationLint` |
+| Fail build if any active findings | `-PfailOnDeprecated` | `./gradlew deprecatedApiScan -PfailOnDeprecated` |
+| Fail only on specific categories | `-PfailOn=handler,progressDialog` | `./gradlew deprecatedApiScan -PfailOnDeprecated -PfailOn=handler` |
+| Update (accept) current findings as baseline | `-PupdateDeprecationBaseline` | `./gradlew deprecatedApiScan -PupdateDeprecationBaseline` |
+| Emit JSON report (`build/deprecated-api-report.json`) | `-PjsonReport` | `./gradlew deprecatedApiScan -PjsonReport` |
+| Include Kotlin sources (optional) | `-PscanKotlin` | `./gradlew deprecatedApiScan -PscanKotlin` |
+
+JSON report contains per-category counts, severities, and whether the run failed. Severities currently:
+
+| Category | Severity |
+|----------|----------|
+| handler | HIGH |
+| progressDialog | MEDIUM |
+| onCreateDialog | MEDIUM |
+
+#### Build Scan Export (Gradle Enterprise)
+
+| Key | Value |
+|-----|-------|
+| deprecatedApi.total | total active findings |
+| deprecatedApi.handler | handler count |
+| deprecatedApi.progressDialog | progressDialog count |
+| deprecatedApi.onCreateDialog | onCreateDialog count |
+
+Tags added: `deprecatedApiFailed` or `deprecatedApiClean`, plus a tag per category with findings (`deprecatedApi-handler`, etc.).
+
+Example (in a build scan Custom values / Tags):
+
+```text
+deprecatedApi.total = 0
+deprecatedApi.handler = 0
+deprecatedApi.progressDialog = 0
+deprecatedApi.onCreateDialog = 0
+Tags: deprecatedApiClean
+```
+
+#### Customizing Severities
+
+Add to root `build.gradle`:
+
+```groovy
+deprecatedApiScanConfig {
+  severities = [ handler: 'CRITICAL', progressDialog: 'LOW' ]
+}
+```
+
+These override defaults (handler HIGH, others MEDIUM). JSON + build scan will reflect your overrides.
+
+_Baseline file_: `deprecation-baseline.txt` (keep empty; update only with justification via `-PupdateDeprecationBaseline`).
+
+Patterns (refined):
+
+- `new Handler()` (no-arg constructor only)
+- `new ProgressDialog(` (instantiations only)
+- `onCreateDialog(int <id>)` (legacy Activity callback signature)
+
+Noise from comments/imports was removed by narrowing to constructor/signature forms. Fragment `onCreateDialog(Bundle)` overrides are not flagged.
+
+Baseline file: `deprecation-baseline.txt` (currently empty). If a regression is intentional, run with `-PupdateDeprecationBaseline` in a dedicated commit/PR explaining the rationale.
+
+CI: The GitHub Actions workflow runs the scan early with `-PfailOnDeprecated -PjsonReport`. A failing scan aborts the build and uploads the JSON for review.
+
+Goal: keep this baseline empty, enforcing forward-only modernization.
 
 ### CI
 

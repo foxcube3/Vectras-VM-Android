@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -205,7 +206,7 @@ public class JoystickView extends View
      */
     private OnMultipleLongPressListener mOnMultipleLongPressListener;
 
-    private final Handler mHandlerMultipleLongPress = new Handler();
+    private final Handler mHandlerMultipleLongPress = new Handler(Looper.getMainLooper());
     private Runnable mRunnableMultipleLongPress;
     private int mMoveTolerance;
 

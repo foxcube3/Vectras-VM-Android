@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.PointF;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
@@ -362,7 +363,7 @@ public class TouchInputHandler {
      * @noinspection NullableProblems */
     private class GestureListener extends GestureDetector.SimpleOnGestureListener
             implements TapGestureDetector.OnTapListener {
-        private final Handler mGestureListenerHandler = new Handler(msg -> {
+    private final Handler mGestureListenerHandler = new Handler(Looper.getMainLooper(), msg -> {
             if (msg.what == InputStub.BUTTON_LEFT)
                 mInputStrategy.onTap(InputStub.BUTTON_LEFT);
             return true;
@@ -630,7 +631,7 @@ public class TouchInputHandler {
         DexListener(Context ctx) {
             mScroller = new GestureDetector(ctx, this, null, false);
         }
-        private final Handler handler = new Handler();
+    private final Handler handler = new Handler(Looper.getMainLooper());
         private final Runnable mouseDownRunnable = () -> mInjector.sendMouseEvent(mRenderData.getCursorPosition(), InputStub.BUTTON_LEFT, true, false);
 
         private final int[][] buttons = {

@@ -2,7 +2,6 @@ package com.vectras.vm;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import android.app.ProgressDialog;
 import static android.os.Build.VERSION.SDK_INT;
 
 import android.app.Notification;
@@ -24,6 +23,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 import android.widget.TextView;
@@ -69,16 +69,10 @@ public class SplashActivity extends AppCompatActivity implements Runnable {
         SharedPreferences prefs = getSharedPreferences(CREDENTIAL_SHARED_PREF, Context.MODE_PRIVATE);
 
         try {
-            new Handler().postDelayed(activity, 1000);
+            new Handler(Looper.getMainLooper()).postDelayed(activity, 1000);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }/*
-        boolean isAccessed = prefs.getBoolean("isFirstLaunch", false);
-        if (isAccessed && !checkConnection(activity)) {
-            new Handler().postDelayed(this, 3000);
-        } else {
         }
-*/
         //if (!checkPermission())
             //requestPermission();
         MainSettingsManager.setOrientationSetting(activity, 1);
@@ -258,7 +252,7 @@ public class SplashActivity extends AppCompatActivity implements Runnable {
 
         @Override
         protected void onPostExecute(String unused) {
-            new Handler().postDelayed(activity, 3000);
+            new Handler(Looper.getMainLooper()).postDelayed(activity, 3000);
         }
     }
 
@@ -316,7 +310,8 @@ public class SplashActivity extends AppCompatActivity implements Runnable {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            new Handler().postDelayed(this, 3000);
+                            // Use explicit main looper to avoid implicit no-arg Handler (deprecated pattern)
+                            new Handler(Looper.getMainLooper()).postDelayed(this, 3000);
                         }
                     });
                 }

@@ -15,6 +15,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -73,7 +74,7 @@ public final class TermuxService extends Service implements SessionChangedCallba
 
     private final IBinder mBinder = new LocalBinder();
 
-    private final Handler mHandler = new Handler();
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
 
     /**
      * The terminal sessions which this service manages.

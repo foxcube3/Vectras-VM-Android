@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.vectras.gradle.DeprecatedApiScanPluginFailureSpec" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-10-05T05:43:45" hostname="DESKTOP-KBG08RN" time="7.099">
+  <properties/>
+  <testcase name="scan fails with deprecated usage when failOnDeprecated set" classname="com.vectras.gradle.DeprecatedApiScanPluginFailureSpec" time="7.099"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
