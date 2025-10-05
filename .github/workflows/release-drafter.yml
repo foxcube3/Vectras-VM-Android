@@ -3,8 +3,6 @@ name: Release Drafter
 on:
   push:
     branches: [ master ]
-  pull_request:
-    types: [opened, reopened, synchronize, labeled, unlabeled, edited]
   workflow_dispatch:
 
 permissions:
@@ -18,8 +16,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
-      - name: Run Release Drafter
+      - name: Run Release Drafter (update draft only)
         uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
