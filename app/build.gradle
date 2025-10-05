@@ -11,6 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.vectras.vm"
+            logger.lifecycle("[archive] Firmware directory contents before fallback: " + (firmwareDir.exists() ? firmwareDir.listFiles()?.collect{it.name} : []))
         minSdk = rootProject.ext.minApi
         targetSdk = rootProject.ext.targetApi
         versionCode = 1
@@ -43,6 +44,26 @@ android {
             } else {
                 include 'arm64-v8a'
                 universalApk false
+            }
+            // Always attempt fallback if primary still missing
+            if (!firmwareFile.exists()) {
+                def patterns = [
+                    /^QEMU_VARS.*\.img$/, /^QEMU_EFI.*\.img$/, /^RELEASEX64_OVMF_VARS.*\.fd$/, /^RELEASEX64_OVMF.*\.fd$/, /^bios.*\.bin$/
+                ]
+                def candidates = firmwareDir.exists() ? (firmwareDir.listFiles()?.findAll { f -> patterns.any { p -> f.name ==~ p } } ?: []) : []
+                logger.lifecycle("[archive] Fallback candidate files: " + candidates.collect{it.name})
+                if (candidates.isEmpty()) {
+                    throw new GradleException("[archive] No fallback firmware candidates found in ${firmwareDir}. Directory contents: " + (firmwareDir.exists() ? firmwareDir.listFiles()?.collect{it.name} : []))
+                }
+                def chosen = candidates.sort { -it.length() }[0]
+                primarySource = 'fallbackBios'
+                logger.warn("[archive] WARNING: Using BIOS/OVMF fallback ${chosen.name} (${chosen.length()} bytes) instead of missing ${firmwareFile.name}; variable store / persistence may differ.")
+                try {
+                    java.nio.file.Files.copy(chosen.toPath(), firmwareFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+                    logger.lifecycle("[archive] Fallback copied to ${firmwareFile.name}")
+                } catch (Throwable t) {
+                    throw new GradleException("[archive] Failed to create fallback primary firmware file: ${t.message}", t)
+                }
             }
         }
     }
