@@ -666,7 +666,7 @@ public class HomeActivity extends AppCompatActivity implements RomStoreFragment.
                 startActivity(new Intent(this, TermuxActivity.class));
             } else if (id == R.id.navigation_item_view_logs) {
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-                View view = getLayoutInflater().inflate(R.layout.bottomsheetdialog_logger, null);
+                View view = getLayoutInflater().inflate(R.layout.bottomsheetdialog_logger, new android.widget.FrameLayout(HomeActivity.this), false);
                 bottomSheetDialog.setContentView(view);
                 bottomSheetDialog.show();
 
@@ -766,7 +766,7 @@ public class HomeActivity extends AppCompatActivity implements RomStoreFragment.
                                 !MainSettingsManager.getSkipVersion(HomeActivity.this).equals(versionNameonUpdate)) {
 
                             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(HomeActivity.this);
-                            View v = getLayoutInflater().inflate(R.layout.update_bottom_dialog_layout, null);
+                            View v = getLayoutInflater().inflate(R.layout.update_bottom_dialog_layout, new android.widget.FrameLayout(HomeActivity.this), false);
                             bottomSheetDialog.setContentView(v);
 
 //                            TextView tvContent = v.findViewById(R.id.tv_content);
@@ -813,20 +813,23 @@ public class HomeActivity extends AppCompatActivity implements RomStoreFragment.
             Gson gson = new Gson();
             List<DataRoms> filteredData = new ArrayList<>();
 
+            String lcKeyword = (keyword == null) ? "" : keyword.toLowerCase(java.util.Locale.ROOT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 filteredData = SharedData.dataRomStore.stream()
                         .filter(rom -> {
                             String romName = (rom.romName != null) ? rom.romName : "";
                             String romKernel = (rom.romKernel != null) ? rom.romKernel : "";
 
-                            return romName.toLowerCase().contains(keyword.toLowerCase())
-                                    || romKernel.toLowerCase().contains(keyword.toLowerCase());
+                            return romName.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword)
+                                    || romKernel.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword);
                         })
                         .collect(Collectors.toList());
             } else {
                 for (DataRoms rom : SharedData.dataRomStore) {
-                    if (rom.romName.toLowerCase().contains(keyword.toLowerCase()) ||
-                            rom.romKernel.toLowerCase().contains(keyword.toLowerCase())) {
+                    String romName = (rom.romName != null) ? rom.romName : "";
+                    String romKernel = (rom.romKernel != null) ? rom.romKernel : "";
+                    if (romName.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword) ||
+                            romKernel.toLowerCase(java.util.Locale.ROOT).contains(lcKeyword)) {
                         filteredData.add(rom);
                     }
                 }

@@ -938,7 +938,7 @@ public class SetupQemuActivity extends AppCompatActivity implements View.OnClick
             LayoutInflater _inflater = getLayoutInflater();
             View _view = _v;
             if (_view == null) {
-                _view = _inflater.inflate(R.layout.simple_layout_for_spiner, null);
+                _view = _inflater.inflate(R.layout.simple_layout_for_spiner, new android.widget.FrameLayout(_inflater.getContext()), false);
             }
 
             final TextView textViewLocation = _view.findViewById(R.id.textViewLocation);
