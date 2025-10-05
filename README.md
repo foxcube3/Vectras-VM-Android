@@ -290,3 +290,21 @@ This repository includes tooling (introduced in PR #1) to optionally purge legac
 
 The rewrite is deferred until maintainers explicitly approve a force-push window. See PR template: `.github/PULL_REQUEST_TEMPLATE/history-rewrite-followup.md` for a structured follow-up.
 
+### Preflight Hash Validation
+
+Before updating a firmware SHA in secrets or Gradle properties, run a local preflight check to ensure the expected hash actually matches the remote asset:
+
+PowerShell:
+
+```powershell
+pwsh ./scripts/verify-firmware-sha.ps1 -Url $env:QEMU_VARS_URL -ExpectedSha256 $env:QEMU_VARS_SHA256
+```
+
+Bash:
+
+```bash
+./scripts/verify-firmware-sha.sh "$QEMU_VARS_URL" "$QEMU_VARS_SHA256"
+```
+
+If this fails, do NOT commit the new hash—investigate the discrepancy (possible mirror sync delay, truncation, or incorrect provided value).
+

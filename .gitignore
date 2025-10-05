@@ -86,3 +86,8 @@ README.html
 # Environment files (sensitive)
 .env
 .env.*
+
+# Temporary mirror / analysis artifacts
+mirror-temp.git/
+*.pack
+*.idx
