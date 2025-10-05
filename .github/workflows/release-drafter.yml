@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write        # to update release drafts
-  pull-requests: write   # to read PR labels/titles for autolabeler
+  contents: write        # update release drafts
+  pull-requests: read    # read PR labels/titles for autolabeler
 
 concurrency:
   group: release-drafter-${{ github.ref }}
@@ -18,7 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
     steps:
+      - name: Verify config exists
+        run: |
+          test -f .github/release-drafter.yml || { echo 'Config missing'; exit 1; }
       - name: Run Release Drafter (update draft only)
         uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-name: .github/release-drafter.yml
