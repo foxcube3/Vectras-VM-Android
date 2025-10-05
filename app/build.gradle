@@ -39,30 +39,27 @@ android {
 }
 
 dependencies {
-    // Glide
-    implementation 'com.github.bumptech.glide:glide:4.16.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-
-    // Test dependencies
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    // Common AndroidX / Material dependencies (provide styles, widgets and themes required by the layouts)
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.core:core-ktx:1.10.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.preference:preference:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.airbnb.android:lottie:5.2.0'
+    // Using version catalog aliases (see gradle/libs.versions.toml)
+    implementation libs.glide
+    annotationProcessor libs.glide.compiler
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.core.ktx
+    implementation libs.material
+    implementation 'androidx.preference:preference:1.2.0' // not yet moved to catalog
+    implementation libs.constraintlayout
+    implementation libs.lottie
     implementation project(':terminal-view')
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation 'com.google.guava:guava:32.1.2-android'
-    implementation 'org.zeroturnaround:zt-zip:1.14'
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
-    implementation 'androidx.activity:activity-ktx:1.8.0'
-    implementation 'androidx.recyclerview:recyclerview:1.3.0'
+    implementation libs.gson
+    implementation libs.retrofit
+    implementation libs.retrofit.gson
+    implementation libs.guava
+    implementation libs.ztzip
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0' // could be added to catalog
+    implementation libs.activity.ktx
+    implementation libs.recyclerview
 }
 
 // --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------
@@ -79,11 +76,19 @@ dependencies {
 def firmwareDir = file("${project.projectDir}/src/main/assets/roms")
 // Firmware variant (e.g., default, debug, secure). Allows multiple images hosted externally.
 def firmwareVariant = (project.findProperty('firmwareVariant') ?: System.getenv('QEMU_VARS_VARIANT') ?: 'default')
-def firmwareBaseName = 'QEMU_VARS'
-def firmwareFile = file("${firmwareDir}/${firmwareBaseName}-${firmwareVariant}.img")
+// Define multiple assets: name -> extension
+def firmwareAssets = [
+    [base: 'QEMU_VARS', ext: 'img', envUrl: 'QEMU_VARS_URL', envSha: 'QEMU_VARS_SHA256'],
+    [base: 'RELEASEX64_OVMF_VARS', ext: 'fd', envUrl: 'RELEASEX64_OVMF_VARS_URL', envSha: 'RELEASEX64_OVMF_VARS_SHA256']
+]
+def primaryAsset = firmwareAssets[0]
+def firmwareBaseName = primaryAsset.base
+def firmwareFiles = firmwareAssets.collect { a -> file("${firmwareDir}/${a.base}-${firmwareVariant}.${a.ext}") }
+// Primary file used by existing single-file tasks for backward compatibility
+def firmwareFile = firmwareFiles[0]
 
-def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv('QEMU_VARS_URL') ?: "https://example.com/path/to/${firmwareBaseName}-${firmwareVariant}.img")
-def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv('QEMU_VARS_SHA256'))
+def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv(primaryAsset.envUrl) ?: "https://example.com/path/to/${primaryAsset.base}-${firmwareVariant}.${primaryAsset.ext}")
+def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv(primaryAsset.envSha))
 def maxAttempts = (project.findProperty('firmwareAttempts') ?: System.getenv('QEMU_VARS_ATTEMPTS') ?: '3') as int
 def skipFirmware = project.hasProperty('skipFirmware')
 def skipFirmwareVerify = project.hasProperty('skipFirmwareVerify')
@@ -102,22 +107,19 @@ def computeSha256 = { File f ->
 }
 
 // Cache metadata (e.g., ETag) to allow conditional HTTP requests.
-def metadataFile = file("${firmwareDir}/${firmwareBaseName}-${firmwareVariant}.meta")
-def readMeta = { String key ->
-    if (!metadataFile.exists()) return null
+def metadataFiles = firmwareAssets.collect { a -> file("${firmwareDir}/${a.base}-${firmwareVariant}.meta") }
+def metadataFile = metadataFiles[0]
+def readMetaFile = { File meta, String key ->
+    if (!meta.exists()) return null
     def props = new Properties()
-    metadataFile.withInputStream { props.load(it) }
+    meta.withInputStream { props.load(it) }
     return props.getProperty(key)
 }
-def writeMeta = { Map<String,String> map ->
+def writeMetaFile = { File meta, Map<String,String> map ->
     def props = new Properties()
-    if (metadataFile.exists()) {
-        metadataFile.withInputStream { props.load(it) }
-    } else {
-        if (!firmwareDir.exists()) firmwareDir.mkdirs()
-    }
+    if (meta.exists()) { meta.withInputStream { props.load(it) } } else { if (!firmwareDir.exists()) firmwareDir.mkdirs() }
     map.each { k,v -> if (v!=null) props.setProperty(k,v) }
-    metadataFile.withOutputStream { out -> props.store(out, 'Firmware metadata cache') }
+    meta.withOutputStream { out -> props.store(out, 'Firmware metadata cache') }
 }
 
 tasks.register('fetchFirmware') {
@@ -126,8 +128,8 @@ tasks.register('fetchFirmware') {
     outputs.file(firmwareFile)
     onlyIf { !skipFirmware }
     doLast {
-        boolean needsDownload = !firmwareFile.exists()
-        String cachedEtag = readMeta('etag')
+    boolean needsDownload = !firmwareFile.exists()
+    String cachedEtag = readMetaFile(metadataFile, 'etag')
         if (!needsDownload) {
             logger.lifecycle("Firmware present: ${firmwareFile.name} (${firmwareFile.length()} bytes)")
             // Optionally attempt conditional HEAD to verify if remote changed when hash provided
@@ -188,8 +190,8 @@ tasks.register('fetchFirmware') {
                     }
                     def etag = conn.getHeaderField('ETag')
                     if (etag) {
-                        writeMeta(etag: etag)
-                        logger.lifecycle("Captured ETag: ${etag}")
+                        writeMetaFile(metadataFile, [etag: etag])
+                        logger.lifecycle("Captured ETag (primary asset): ${etag}")
                     }
                 }
                 // Atomic move
@@ -264,6 +266,95 @@ tasks.register('printFirmwareSha256') {
         logger.lifecycle("SHA-256: ${actual}")
         println(actual)
     }
+}
+
+// Multi-asset parallel fetch (best-effort). Each asset can override URL & hash via properties:
+// -Passet.<base>.url / env <BASE>_URL   and -Passet.<base>.sha256 / env <BASE>_SHA256
+// Example: -Passet.RELEASEX64_OVMF_VARS.url=https://.../RELEASEX64_OVMF_VARS-default.fd
+tasks.register('fetchAllFirmware') {
+    group = 'vectras'
+    description = 'Fetches all defined firmware assets (primary + secondary).'    
+    onlyIf { !skipFirmware }
+    doLast {
+        if (!firmwareDir.exists()) firmwareDir.mkdirs()
+        firmwareAssets.parallelStream().forEach { a ->
+            File target = file("${firmwareDir}/${a.base}-${firmwareVariant}.${a.ext}")
+            File meta = file("${firmwareDir}/${a.base}-${firmwareVariant}.meta")
+            String urlOverride = (project.findProperty("asset.${a.base}.url") ?: System.getenv(a.envUrl) ?: "https://example.com/path/to/${a.base}-${firmwareVariant}.${a.ext}")
+            String shaOverride = (project.findProperty("asset.${a.base}.sha256") ?: System.getenv(a.envSha))
+            boolean force = project.hasProperty('forceFirmware')
+            boolean need = force || !target.exists()
+            if (!need && shaOverride) {
+                def existing = computeSha256(target)
+                if (!existing?.equalsIgnoreCase(shaOverride)) {
+                    need = true
+                }
+            }
+            if (!need) {
+                logger.lifecycle("[multi] ${target.name} already present")
+                return
+            }
+            logger.lifecycle("[multi] Downloading ${a.base} variant=${firmwareVariant} from ${urlOverride}")
+            File tmp = new File(target.parentFile, target.name + '.part')
+            if (tmp.exists()) tmp.delete()
+            int attempt = 1
+            int max = maxAttempts
+            boolean ok = false
+            while (attempt <= max && !ok) {
+                try {
+                    def u = new URL(urlOverride)
+                    u.openConnection().with { conn ->
+                        conn.connectTimeout = 15000
+                        conn.readTimeout = 600000
+                        conn.inputStream.withCloseable { input ->
+                            tmp.withOutputStream { out ->
+                                byte[] buf = new byte[1*1024*1024]
+                                int r
+                                long total = 0
+                                long lastReport = System.currentTimeMillis()
+                                while ((r = input.read(buf)) != -1) {
+                                    out.write(buf,0,r)
+                                    total += r
+                                    if (System.currentTimeMillis() - lastReport > 5000) {
+                                        logger.lifecycle(String.format(Locale.ROOT, "[multi %s attempt %d] %,d bytes", a.base, attempt, total))
+                                        lastReport = System.currentTimeMillis()
+                                    }
+                                }
+                                logger.lifecycle(String.format(Locale.ROOT, "[multi %s attempt %d] complete (%,d bytes)", a.base, attempt, total))
+                            }
+                        }
+                        def et = conn.getHeaderField('ETag')
+                        if (et) writeMetaFile(meta, [etag: et])
+                    }
+                    if (target.exists()) target.delete()
+                    if (!tmp.renameTo(target)) throw new GradleException("Could not finalize ${target}")
+                    if (shaOverride) {
+                        def got = computeSha256(target)
+                        if (!got?.equalsIgnoreCase(shaOverride)) {
+                            target.delete(); throw new GradleException("SHA mismatch for ${a.base} expected=${shaOverride} got=${got}")
+                        }
+                    }
+                    ok = true
+                } catch (Throwable t) {
+                    logger.warn("[multi ${a.base}] attempt ${attempt} failed: ${t.class.simpleName}: ${t.message}")
+                    attempt++
+                    if (attempt <= max) {
+                        long back = (long)Math.min(30000, Math.pow(2, attempt - 2) * 1000L)
+                        sleep(back)
+                    }
+                }
+            }
+            if (!ok) throw new GradleException("Failed to fetch asset ${a.base} after ${max} attempts")
+            if (!shaOverride) logger.lifecycle("[multi] ${a.base} done (no hash to verify)")
+        }
+    }
+}
+
+// Aggregate multi asset + standard verify (primary) for CI convenience
+tasks.register('ciAllFirmwareCheck') {
+    group = 'verification'
+    description = 'Fetch all assets + verify primary asset hash + print primary hash.'
+    dependsOn 'fetchAllFirmware', 'verifyFirmware', 'printFirmwareSha256'
 }
 
 // Aggregate CI convenience task: fetch + verify (if hash) + print hash
