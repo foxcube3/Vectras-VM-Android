@@ -423,6 +423,21 @@ tasks.register('ciFirmwareCheck') {
     dependsOn tasks.named('verifyFirmware'), tasks.named('printFirmwareSha256')
 }
 
+// Lightweight guard assertion (non-fatal) to help ensure sample SHA not shipped accidentally.
+tasks.register('assertNoSampleFirmwareSha') {
+    group = 'verification'
+    description = 'Fails if the sample placeholder firmware SHA is still configured (unless allow flag present).'
+    doLast {
+        if (expectedSha256 && expectedSha256.equalsIgnoreCase(sampleShaPlaceholder) && !project.hasProperty('allowSampleFirmwareSha')) {
+            throw new GradleException("Sample placeholder firmware SHA in use. Replace with production value or run with -PallowSampleFirmwareSha if intentional.")
+        } else if (expectedSha256?.equalsIgnoreCase(sampleShaPlaceholder)) {
+            logger.lifecycle("Sample SHA allowed explicitly via -PallowSampleFirmwareSha.")
+        } else {
+            logger.lifecycle("No sample firmware SHA detected.")
+        }
+    }
+}
+
 // Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {
     if (!skipFirmware) {
