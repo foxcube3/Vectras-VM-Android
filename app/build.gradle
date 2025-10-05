@@ -48,8 +48,7 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.material
-    // preference library not defined in version catalog; using explicit coordinate until added
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation libs.preference
     implementation libs.constraintlayout
     implementation libs.lottie
     implementation project(':terminal-view')
@@ -58,8 +57,7 @@ dependencies {
     implementation libs.retrofit.gson
     implementation libs.guava
     implementation libs.ztzip
-    // swiperefreshlayout not in catalog; use explicit coordinate
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+    implementation libs.swiperefreshlayout
     implementation libs.activity.ktx
     implementation libs.recyclerview
     // (Legacy explicit versions block from master removed in favor of version catalog above)
