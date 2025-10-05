@@ -65,6 +65,62 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.3.0'
 }
 
+// --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------
+// Provides a lightweight way to obtain large firmware files (e.g., QEMU_VARS.img)
+// without committing them to the fork repository. The URL can point to a Release asset
+// or an external CDN. Adjust FIRMWARE_URL as needed.
+ext.FIRMWARE_URL = System.getenv('QEMU_VARS_URL') ?: "https://example.com/path/to/QEMU_VARS.img"
+def firmwareDir = file("${project.projectDir}/src/main/assets/roms")
+def firmwareFile = file("${firmwareDir}/QEMU_VARS.img")
+
+tasks.register('fetchFirmware') {
+    description = 'Downloads QEMU_VARS.img firmware asset if not already present.'
+    group = 'vectras'
+    outputs.file(firmwareFile)
+    doLast {
+        if (firmwareFile.exists()) {
+            logger.lifecycle("Firmware already present: ${firmwareFile} (${firmwareFile.length()} bytes)")
+            return
+        }
+        if (!firmwareDir.exists() && !firmwareDir.mkdirs()) {
+            throw new GradleException("Could not create firmware directory: ${firmwareDir}")
+        }
+        def url = new URL(ext.FIRMWARE_URL)
+        logger.lifecycle("Downloading firmware from ${url} ...")
+        url.openConnection().with { conn ->
+            conn.connectTimeout = 15000
+            conn.readTimeout = 600000 // 10 min for large file
+            conn.inputStream.withCloseable { input ->
+                firmwareFile.withOutputStream { out ->
+                    byte[] buf = new byte[1 * 1024 * 1024]
+                    long total = 0
+                    int r
+                    long lastReport = System.currentTimeMillis()
+                    while ((r = input.read(buf)) != -1) {
+                        out.write(buf, 0, r)
+                        total += r
+                        def now = System.currentTimeMillis()
+                        if (now - lastReport > 5000) { // report every 5s
+                            logger.lifecycle(String.format(Locale.ROOT, "Downloaded %,d bytes...", total))
+                            lastReport = now
+                        }
+                    }
+                    logger.lifecycle(String.format(Locale.ROOT, "Firmware download complete (%,d bytes).", total))
+                }
+            }
+        }
+    }
+}
+
+// Ensure firmware is present before building APK (can be skipped via -PskipFirmware)
+tasks.matching { it.name == 'preBuild' }.configureEach {
+    if (!project.hasProperty('skipFirmware')) {
+        dependsOn tasks.named('fetchFirmware')
+    } else {
+        logger.lifecycle('Skipping firmware fetch due to -PskipFirmware flag.')
+    }
+}
+
 // Apply Crashlytics plugin if the classpath provides it
 try {
     apply plugin: 'com.google.firebase.crashlytics'
