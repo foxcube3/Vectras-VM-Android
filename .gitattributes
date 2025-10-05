@@ -1,0 +1,13 @@
+# Git LFS tracking for large binary/runtime assets
+# QEMU firmware / vars images
+app/src/main/assets/roms/*.img filter=lfs diff=lfs merge=lfs -text
+
+# Native shared libraries packaged with the app (exclude build intermediates)
+app/src/main/jniLibs/**/*.so filter=lfs diff=lfs merge=lfs -text
+
+# Any module native libraries (broader catch-all)
+**/src/main/jniLibs/**/*.so filter=lfs diff=lfs merge=lfs -text
+
+# (Optional) future binary patterns can be added below
+# Example:
+# app/src/main/assets/roms/*.bin filter=lfs diff=lfs merge=lfs -text

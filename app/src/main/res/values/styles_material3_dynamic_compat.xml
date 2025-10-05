@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Provide compatibility aliases for DynamicColors NoActionBar parents that some themes expect -->
+    <!-- Map to the nearest existing Material3 NoActionBar themes provided by the material library -->
+    <style name="Theme.Material3.DynamicColors.Light.NoActionBar" parent="Theme.Material3.Light.NoActionBar" />
+    <style name="Theme.Material3.DynamicColors.Dark.NoActionBar" parent="Theme.Material3.Dark.NoActionBar" />
+</resources>

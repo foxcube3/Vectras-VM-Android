@@ -94,3 +94,103 @@ Help support the project by contributing!
 [link-releases]: https://github.com/xoureldeen/Vectras-VM-Android/releases/
 [link-buymeacoffee]: https://www.buymeacoffee.com/vectrasvm
 [link-ko-fi]: https://ko-fi.com/vectrasvm
+
+## Firmware / ROM Assets (QEMU_VARS.img)
+
+Large firmware images are not committed directly to this fork to avoid Git LFS push restrictions on forks and to keep clone size small.
+
+The build includes Gradle tasks to automatically fetch and verify `QEMU_VARS.img` into `app/src/main/assets/roms/` when missing:
+
+Tasks:
+- `:app:fetchFirmware` – Download (with retries, ETag caching, progress) if absent or forced.
+- `:app:verifyFirmware` – Verify SHA-256 integrity (if an expected hash is provided).
+- `:app:printFirmwareSha256` – Output current firmware hash (fetches first if needed).
+- `:app:ciFirmwareCheck` – Aggregate (fetch + verify + print); useful in CI pipelines.
+
+### Variants
+You may host multiple firmware variants (e.g., debug, secure). Select via:
+- Gradle property: `-PfirmwareVariant=debug`
+- Env var: `QEMU_VARS_VARIANT=debug`
+Default variant: `default`.
+
+Files are stored as `QEMU_VARS-<variant>.img`.
+
+### URL Configuration Precedence
+1. Gradle property: `-PfirmwareUrl=https://.../QEMU_VARS-<variant>.img`
+2. Env var: `QEMU_VARS_URL`
+3. Fallback placeholder (will 404 until replaced)
+
+### SHA-256 Integrity Verification
+Provide the expected hash to enforce verification:
+1. Gradle property: `-PfirmwareSha256=<hex>`
+2. Env var: `QEMU_VARS_SHA256`
+
+If omitted, verification logs a skip message. To skip only verification (even if hash supplied): add `-PskipFirmwareVerify`.
+
+### Retry & Caching Logic
+Retries: default 3 (configure `-PfirmwareAttempts=5` or env `QEMU_VARS_ATTEMPTS=5`).
+Backoff: exponential (1s,2s,4s,8s ... capped at 30s). Progress logged ~every 5s.
+Caching: ETag stored in a `.meta` file; future fetches can leverage conditional requests (future optimization path).
+
+### Environment Examples
+Linux/macOS:
+```bash
+export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS.img"
+export QEMU_VARS_SHA256="<expected_sha256>"
+./gradlew assembleDebug
+```
+
+PowerShell:
+```powershell
+$env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS.img"
+$env:QEMU_VARS_SHA256 = "<expected_sha256>"
+./gradlew.bat assembleDebug
+```
+
+Using Gradle properties instead of env vars:
+```bash
+./gradlew assembleDebug \
+  -PfirmwareUrl=https://your.hosted.location/QEMU_VARS-default.img \
+  -PfirmwareSha256=<expected_sha256> \
+  -PfirmwareVariant=default
+```
+
+### Skipping Fetch
+If CI or local workflows stage the file another way:
+```bash
+./gradlew assembleDebug -PskipFirmware
+```
+
+### Manual Invocation
+Just fetch (default variant):
+```bash
+./gradlew :app:fetchFirmware
+```
+Fetch + verify specific variant:
+```bash
+./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=<expected_sha256>
+```
+Print hash:
+```bash
+./gradlew :app:printFirmwareSha256 -PfirmwareVariant=secure
+```
+CI helper:
+```bash
+./gradlew :app:ciFirmwareCheck -PfirmwareSha256=<expected_sha256>
+```
+
+### Verification Failure Handling
+On mismatch the file is deleted and the build fails, preventing stale/incomplete firmware from shipping.
+
+### Hosting Recommendations
+- Upstream repository with Git LFS enabled.
+- Separate "assets" repository (LFS) referenced by releases.
+- Trusted CDN or object storage (S3, Cloudflare R2, etc.).
+
+### Security Considerations
+- Always pin a SHA-256 for production distributions.
+- Prefer HTTPS and stable, versioned URLs.
+- Rotate / invalidate compromised assets by changing URL + hash.
+
+If you maintain the upstream repository and want to host the file via Git LFS, add it there; forks will then reference the pointer without needing this fetch (you may later remove this mechanism or leave it as a fallback).
+

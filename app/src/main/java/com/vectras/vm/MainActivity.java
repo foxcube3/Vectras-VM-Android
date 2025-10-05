@@ -395,7 +395,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(activity, TermuxActivity.class));
             } else if (id == R.id.navigation_item_view_logs) {
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(activity);
-                View view = activity.getLayoutInflater().inflate(R.layout.bottomsheetdialog_logger, null);
+                View view = activity.getLayoutInflater().inflate(R.layout.bottomsheetdialog_logger, new android.widget.FrameLayout(activity), false);
                 bottomSheetDialog.setContentView(view);
                 bottomSheetDialog.show();
 
@@ -1000,6 +1000,8 @@ public class MainActivity extends AppCompatActivity {
             intent.addCategory(Intent.CATEGORY_HOME);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            // Call super to preserve default back behavior (lint requires this)
+            super.onBackPressed();
         }
     }
 
@@ -1275,7 +1277,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showProgressDialog(String _content) {
-        View progressView = LayoutInflater.from(activity).inflate(R.layout.dialog_progress_style, null);
+    View progressView = LayoutInflater.from(activity).inflate(R.layout.dialog_progress_style, new android.widget.FrameLayout(activity), false);
         TextView progress_text = progressView.findViewById(R.id.progress_text);
         progress_text.setText(_content);
         progressDialog = new MaterialAlertDialogBuilder(activity, R.style.CenteredDialogTheme)

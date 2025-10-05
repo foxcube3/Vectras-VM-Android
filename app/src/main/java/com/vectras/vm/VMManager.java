@@ -533,7 +533,7 @@ public class VMManager {
 
     public static boolean isADiskFile (@NonNull String _filepath) {
         if (_filepath.contains(".")) {
-            String _getFileName = Objects.requireNonNull(Uri.parse(_filepath).getLastPathSegment()).toLowerCase();
+            String _getFileName = Objects.requireNonNull(Uri.parse(_filepath).getLastPathSegment()).toLowerCase(java.util.Locale.ROOT);
             String _getFileFormat = _getFileName.substring((int)(_getFileName.lastIndexOf(".") + 1), (int)(_getFileName.length()));
             return "qcow2,img,vhd,vhdx,vdi,qcow,vmdk,vpc".contains(_getFileFormat);
         }
@@ -561,7 +561,7 @@ public class VMManager {
 
     public static boolean isAISOFile (@NonNull String _filepath) {
         if (_filepath.contains(".")) {
-            String _getFileName = Objects.requireNonNull(Uri.parse(_filepath).getLastPathSegment()).toLowerCase();
+            String _getFileName = Objects.requireNonNull(Uri.parse(_filepath).getLastPathSegment()).toLowerCase(java.util.Locale.ROOT);
             String _getFileFormat = _getFileName.substring((int)(_getFileName.lastIndexOf(".") + 1), (int)(_getFileName.length()));
             return "iso".contains(_getFileFormat);
         }
@@ -689,11 +689,11 @@ public class VMManager {
     public static boolean isthiscommandsafeimg(@NonNull String _command, Context _context) {
         if (!_command.contains("qcow2")) {
             String _getsize = _command.substring(_command.lastIndexOf(" ") + 1);
-            if (_getsize.toLowerCase().endsWith("t") || _getsize.toLowerCase().endsWith("p")  || _getsize.toLowerCase().endsWith("e")) {
+            if (_getsize.toLowerCase(java.util.Locale.ROOT).endsWith("t") || _getsize.toLowerCase(java.util.Locale.ROOT).endsWith("p")  || _getsize.toLowerCase(java.util.Locale.ROOT).endsWith("e")) {
                 latestUnsafeCommandReason = _context.getString(R.string.size_too_large_try_qcow2_format);
                 return false;
             }
-            if (_getsize.toLowerCase().endsWith("g")) {
+            if (_getsize.toLowerCase(java.util.Locale.ROOT).endsWith("g")) {
                 if (_getsize.length() <= 2) {
                     return true;
                 } else {
@@ -701,7 +701,7 @@ public class VMManager {
                     return false;
                 }
             }
-            if (_getsize.toLowerCase().endsWith("m")) {
+            if (_getsize.toLowerCase(java.util.Locale.ROOT).endsWith("m")) {
                 if (_getsize.length() <= 4) {
                     return true;
                 } else {
@@ -709,7 +709,7 @@ public class VMManager {
                     return false;
                 }
             }
-            if (_getsize.toLowerCase().endsWith("k")) {
+            if (_getsize.toLowerCase(java.util.Locale.ROOT).endsWith("k")) {
                 if (_getsize.length() <= 8) {
                     return true;
                 } else {
@@ -750,8 +750,8 @@ public class VMManager {
     }
 
     public static void setIconWithName(ImageView imageview, String name) {
-        String itemName = name.toLowerCase();
-        if (itemName.contains("linux") || itemName.contains("ubuntu")  || itemName.contains("debian") || itemName.contains("arch") || itemName.contains("kali")) {
+    String itemName = name.toLowerCase(java.util.Locale.ROOT);
+    if (itemName.contains("linux") || itemName.contains("ubuntu")  || itemName.contains("debian") || itemName.contains("arch") || itemName.contains("kali")) {
             imageview.setImageResource(R.drawable.linux);
         } else if (itemName.contains("windows")) {
             imageview.setImageResource(R.drawable.windows);
@@ -812,7 +812,7 @@ public class VMManager {
 
         String allDevice = getAllDevicesInQemu();
 
-        View _view = LayoutInflater.from(_activity).inflate(R.layout.dialog_change_removable_devices, null);
+    View _view = LayoutInflater.from(_activity).inflate(R.layout.dialog_change_removable_devices, new android.widget.FrameLayout(_activity), false);
         AlertDialog _dialog = new MaterialAlertDialogBuilder(_activity, R.style.CenteredDialogTheme)
                 .setView(_view)
                 .create();
@@ -955,7 +955,7 @@ public class VMManager {
     }
 
     public static void showChangeRemovableDevicesWithIDDialog(Activity _activity) {
-        View _view = LayoutInflater.from(_activity).inflate(R.layout.widget_edittext_dialog, null);
+    View _view = LayoutInflater.from(_activity).inflate(R.layout.widget_edittext_dialog, new android.widget.FrameLayout(_activity), false);
         AlertDialog _dialog = new MaterialAlertDialogBuilder(_activity, R.style.CenteredDialogTheme)
                 .setTitle(_activity.getString(R.string.change_a_removable_device))
                 .setView(_view)

@@ -49,7 +49,8 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/cast_warning_24px"
-                app:tint="@android:color/white" />
+                app:tint="@android:color/white"
+                android:contentDescription="@null" />
 
             <TextView
                 android:layout_width="wrap_content"
