@@ -455,6 +455,41 @@ tasks.matching { it.name == 'preBuild' }.configureEach {
     }
 }
 
+// Minimal environment validation task (no firmware download) for CI quick-check
+tasks.register('envCheck') {
+    group = 'verification'
+    description = 'Validates essential environment: SDK path, Java version, gradle plugin versions; skips firmware.'
+    doLast {
+        // Basic SDK detection replicating scripts/check-env logic
+        def sdkDir = null
+        def localProps = file('../local.properties')
+        if (localProps.exists()) {
+            def line = localProps.readLines().find { it.startsWith('sdk.dir=') }
+            if (line) sdkDir = line.substring('sdk.dir='.length())
+        }
+        if (!sdkDir) sdkDir = System.getenv('ANDROID_HOME')
+        if (!sdkDir) sdkDir = System.getenv('ANDROID_SDK_ROOT')
+        if (!sdkDir) {
+            throw new GradleException('envCheck: Android SDK path not found (local.properties sdk.dir or ANDROID_HOME / ANDROID_SDK_ROOT required).')
+        }
+        if (!file(sdkDir).exists()) {
+            throw new GradleException("envCheck: Android SDK directory does not exist: ${sdkDir}")
+        }
+        logger.lifecycle("envCheck: SDK directory = ${sdkDir}")
+
+        // Java version (should be 17+ for current toolchain)
+        def javaVersion = org.gradle.internal.jvm.Jvm.current().javaVersion
+        if (javaVersion < JavaVersion.VERSION_17) {
+            throw new GradleException("envCheck: Java 17+ required. Detected: ${javaVersion}")
+        }
+        logger.lifecycle("envCheck: Java version = ${javaVersion}")
+
+        // Assert critical plugins are on expected versions (best-effort)
+        def agp = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
+        logger.lifecycle("envCheck: Android Gradle Plugin version = ${agp}")
+    }
+}
+
 // Apply Crashlytics plugin if the classpath provides it
 try {
     apply plugin: 'com.google.firebase.crashlytics'

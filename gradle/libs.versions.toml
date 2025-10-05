@@ -16,6 +16,9 @@ swiperefreshlayout = "1.1.0"
 junit = "4.13.2"
 ext-junit = "1.1.5"
 espresso = "3.5.1"
+google-services = "4.4.3"
+firebase-crashlytics-gradle = "2.9.8"
+android-gradle-plugin = "8.3.2"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
@@ -41,3 +44,8 @@ espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "esp
 # Glide with annotation processor
 "glide-compiler" = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 "glide" = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+
+# Build plugins (declared as libraries for central versioning)
+google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
+firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "android-gradle-plugin" }
