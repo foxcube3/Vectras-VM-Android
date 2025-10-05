@@ -55,6 +55,7 @@ android {
 dependencies {
     // Using version catalog aliases (see gradle/libs.versions.toml)
     implementation libs.glide
+    implementation 'androidx.annotation:annotation:1.7.1'
     annotationProcessor libs.glide.compiler
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
