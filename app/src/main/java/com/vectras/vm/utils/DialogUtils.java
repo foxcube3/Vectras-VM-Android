@@ -19,7 +19,7 @@ import com.vectras.vm.R;
 public class DialogUtils {
 
     public static void oneDialog(Activity _context, String _title, String _message, String _textPositiveButton, boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onDismiss) {
-    View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, new android.widget.FrameLayout(_context), false);
+        View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
         dialog.setCancelable(_cancel);
@@ -61,7 +61,7 @@ public class DialogUtils {
         dialog.show();
     }
     public static void twoDialog(Activity _context, String _title, String _message, String _textPositiveButton, String _textNegativeButton, boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onNegative, Runnable _onDismiss) {
-    View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, new android.widget.FrameLayout(_context), false);
+        View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
         dialog.setCancelable(_cancel);
@@ -112,7 +112,7 @@ public class DialogUtils {
     }
 
     public static void threeDialog(Activity _context, String _title, String _message, String _textPositiveButton, String _textNegativeButton, String _textNeutralButton ,boolean _isicon, int _iconid, boolean _cancel, Runnable _onPositive, Runnable _onNegative, Runnable _onNeutral, Runnable _onDismiss) {
-    View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, new android.widget.FrameLayout(_context), false);
+        View buttonsView = LayoutInflater.from(_context).inflate(R.layout.dialog_layout, null);
 
         AlertDialog dialog = new AlertDialog.Builder(_context).create();
         dialog.setCancelable(_cancel);

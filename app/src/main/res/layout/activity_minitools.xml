@@ -64,8 +64,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/host_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/host_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -100,8 +99,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/volume_up_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/volume_up_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -122,8 +120,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/cleaning_services_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/cleaning_services_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -144,8 +141,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/settings_backup_restore_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/settings_backup_restore_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -166,8 +162,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/delete_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/delete_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -188,8 +183,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/delete_forever_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/delete_forever_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -210,8 +204,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/system_update_24px"
-                    android:contentDescription="@null" />
+                    android:src="@drawable/system_update_24px" />
 
                 <TextView
                     android:layout_width="wrap_content"

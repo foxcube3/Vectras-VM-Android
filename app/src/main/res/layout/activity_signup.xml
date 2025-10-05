@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/action_sign_up"
-            android:textAlignment="center"
+            android:textAlignment="textStart"
             android:textSize="24sp"
             android:textStyle="bold" />
 

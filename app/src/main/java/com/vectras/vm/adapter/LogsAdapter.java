@@ -155,26 +155,18 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.logViewHolder>
 			@Override
 			public void onClick(View v)
 			{
-				if (itemClickListener != null) {
-					int adapterPos = viewHolder.getAdapterPosition();
-					if (adapterPos != RecyclerView.NO_POSITION)
-						itemClickListener.onItemClick(v, adapterPos, text);
-				}
+				if (itemClickListener != null)
+					itemClickListener.onItemClick(v, position, text);
 			}
 		});
-		
+
 		viewHolder.textLog.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v)
 			{
-				if (itemClickListener != null) {
-					int adapterPos = viewHolder.getAdapterPosition();
-					if (adapterPos != RecyclerView.NO_POSITION) {
-						itemClickListener.onItemLongClick(v, adapterPos, text);
-						return true;
-					}
-				}
-				return false;
+				if (itemClickListener != null)
+					itemClickListener.onItemLongClick(v, position, text);
+				return true;
 			}
 		});
 	}
@@ -241,7 +233,7 @@ public class LogsAdapter extends RecyclerView.Adapter<LogsAdapter.logViewHolder>
 			Date d = new Date(le.getLogtime());
 			java.text.DateFormat timeformat;
 			if (time == TIME_FORMAT_SHORT)
-				timeformat = new SimpleDateFormat("HH:mm a", java.util.Locale.getDefault());
+				timeformat = new SimpleDateFormat("HH:mm a");
 			else
 				timeformat = DateFormat.getTimeFormat(mContext);
 

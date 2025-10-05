@@ -55,8 +55,7 @@
                     android:clickable="true"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/person_24"
-                    android:contentDescription="@string/profile" />
+                    app:srcCompat="@drawable/person_24" />
 
             </androidx.cardview.widget.CardView>
 

@@ -72,7 +72,7 @@ public class AdapterMainRoms extends RecyclerView.Adapter<RecyclerView.ViewHolde
         myHolder.optionsBtn.setOnClickListener(view -> {
 
             BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
-            View v = activity.getLayoutInflater().inflate(R.layout.rom_options_dialog, new android.widget.FrameLayout(activity), false);
+            View v = activity.getLayoutInflater().inflate(R.layout.rom_options_dialog, null);
             bottomSheetDialog.setContentView(v);
 
             Button modifyRomBtn = v.findViewById(R.id.modifyRomBtn);

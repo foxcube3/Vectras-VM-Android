@@ -65,8 +65,7 @@
                         android:layout_width="84dp"
                         android:layout_height="84dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_computer_180dp_with_padding"
-                        android:contentDescription="@null" />
+                        android:src="@drawable/ic_computer_180dp_with_padding" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
@@ -119,8 +118,7 @@
                             android:id="@+id/iv_verified"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/verified_user_24px"
-                            android:contentDescription="@null" />
+                            android:src="@drawable/verified_user_24px" />
 
                         <TextView
                             android:id="@+id/tv_verified"
@@ -148,8 +146,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/account_circle_24px"
-                            android:contentDescription="@null" />
+                            android:src="@drawable/account_circle_24px" />
 
                         <TextView
                             android:id="@+id/tv_creator"
@@ -177,8 +174,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/devices_other_24px"
-                            android:contentDescription="@null" />
+                            android:src="@drawable/devices_other_24px" />
 
                         <TextView
                             android:id="@+id/tv_arch"
@@ -206,8 +202,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/hard_drive_24px"
-                            android:contentDescription="@null" />
+                            android:src="@drawable/hard_drive_24px" />
 
                         <TextView
                             android:id="@+id/tv_size"
@@ -235,8 +230,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@drawable/file_copy_24px"
-                            android:contentDescription="@null" />
+                            android:src="@drawable/file_copy_24px" />
 
                         <TextView
                             android:id="@+id/tv_filename"

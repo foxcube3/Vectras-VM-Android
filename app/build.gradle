@@ -60,6 +60,7 @@ dependencies {
     implementation libs.swiperefreshlayout
     implementation libs.activity.ktx
     implementation libs.recyclerview
+    // (Legacy explicit versions block from master removed in favor of version catalog above)
 }
 
 // --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------

@@ -171,7 +171,7 @@ public class HomeStartVM {
     }
 
     public static void showProgressDialog(Activity activity, String _content) {
-    View progressView = LayoutInflater.from(activity).inflate(R.layout.dialog_progress_style, new android.widget.FrameLayout(activity), false);
+        View progressView = LayoutInflater.from(activity).inflate(R.layout.dialog_progress_style, null);
         TextView progress_text = progressView.findViewById(R.id.progress_text);
         progress_text.setText(_content);
         progressDialog = new MaterialAlertDialogBuilder(activity, R.style.CenteredDialogTheme)

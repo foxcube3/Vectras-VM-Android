@@ -73,8 +73,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:padding="8dp"
-                android:src="@drawable/more_vert_24px"
-                android:contentDescription="@string/options" />
+                android:src="@drawable/more_vert_24px" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

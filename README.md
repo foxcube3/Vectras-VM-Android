@@ -307,4 +307,3 @@ Bash:
 ```
 
 If this fails, do NOT commit the new hash—investigate the discrepancy (possible mirror sync delay, truncation, or incorrect provided value).
-

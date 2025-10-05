@@ -1263,7 +1263,7 @@ public class MainVNCActivity extends VncCanvasActivity {
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater _inflater = getLayoutInflater();
-            View _v = _inflater.inflate(R.layout.layout_for_send_keys, new android.widget.FrameLayout(_inflater.getContext()), false);
+            View _v = _inflater.inflate(R.layout.layout_for_send_keys, null);
             RecyclerView.LayoutParams _lp = new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             _v.setLayoutParams(_lp);
             return new ViewHolder(_v);

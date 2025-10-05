@@ -15,8 +15,7 @@
             android:id="@+id/icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/add_24px"
-            android:contentDescription="@null"/>
+            android:src="@drawable/add_24px"/>
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"

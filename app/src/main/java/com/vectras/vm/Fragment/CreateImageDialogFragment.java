@@ -50,7 +50,7 @@ public class CreateImageDialogFragment extends DialogFragment {
 
         builder.setTitle("Create Image");
 
-    View view = getActivity().getLayoutInflater().inflate(R.layout.create_vhd, new android.widget.FrameLayout(getActivity()), false);
+        View view = getActivity().getLayoutInflater().inflate(R.layout.create_vhd, null);
 
         TextInputEditText imageSize = view.findViewById(R.id.size);
 

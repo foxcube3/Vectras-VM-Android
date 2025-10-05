@@ -579,7 +579,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("lastDir", imagesPath);
-    edit.apply();
+        edit.commit();
     }
 
     public static String getImagesDir(Context context) {
@@ -592,7 +592,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("imagesDir", imagesPath);
-    edit.apply();
+        edit.commit();
     }
 
 
@@ -606,7 +606,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("exportDir", imagesPath);
-    edit.apply();
+        edit.commit();
     }
 
 
@@ -634,7 +634,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putInt("exitCode", exitCode);
-    edit.apply();
+        edit.commit();
     }
 
     public static String getControlMode(Context context) {
@@ -647,7 +647,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("controlMode", controlMode);
-    edit.apply();
+        edit.commit();
     }
 
 
@@ -655,7 +655,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("modeNight", nightMode);
-    edit.apply();
+        edit.commit();
     }
 
     public static Boolean getModeNight(Context context) {
@@ -834,7 +834,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("firstTime" + pInfo.versionName, false);
-    edit.apply();
+        edit.commit();
     }
 
 
@@ -870,7 +870,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("setUpWithManualSetupBefore", _boolean);
-    edit.apply();
+        edit.commit();
     }
 
     public static Boolean getsetUpWithManualSetupBefore(Context context) {
@@ -882,7 +882,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putInt("SelectedMirror", _int);
-    edit.apply();
+        edit.commit();
     }
 
     public static int getSelectedMirror(Context context) {
@@ -894,7 +894,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("dontShowAgainJoinBetaUpdateChannelDialog", _boolean);
-    edit.apply();
+        edit.commit();
     }
 
     public static Boolean getDontShowAgainJoinBetaUpdateChannelDialog(Context context) {
@@ -906,7 +906,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("useDefaultBios", _boolean);
-    edit.apply();
+        edit.commit();
     }
 
     public static Boolean getuseDefaultBios(Context context) {
@@ -918,7 +918,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putBoolean("useUEFI", _boolean);
-    edit.apply();
+        edit.commit();
     }
 
     public static Boolean getuseUEFI(Context context) {
@@ -930,7 +930,7 @@ public class MainSettingsManager extends AppCompatActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor edit = prefs.edit();
         edit.putString("skipVersion", version);
-    edit.apply();
+        edit.commit();
     }
 
     public static String getSkipVersion(Context context) {

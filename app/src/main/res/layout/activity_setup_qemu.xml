@@ -21,8 +21,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/emoticon_96px"
-            android:contentDescription="@null" />
+            android:src="@drawable/emoticon_96px" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -55,7 +54,7 @@
         android:orientation="vertical"
         android:visibility="visible">
 
-        <com.google.android.material.progressindicator.CircularProgressIndicator
+        <com.google.android.material.loadingindicator.LoadingIndicator
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -79,8 +78,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/cloud_off_96px"
-            android:contentDescription="@null" />
+            android:src="@drawable/cloud_off_96px" />
 
         <TextView
             android:layout_width="wrap_content"

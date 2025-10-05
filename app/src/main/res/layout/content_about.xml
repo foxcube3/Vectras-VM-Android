@@ -43,8 +43,7 @@
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:src="@mipmap/ic_launcher"
-                            android:contentDescription="@null" />
+                            android:src="@mipmap/ic_launcher" />
 
                         <TextView
                             style="@android:style/Widget.TextView"
@@ -78,8 +77,7 @@
                                 android:id="@+id/imageView"
                                 android:layout_width="24dp"
                                 android:layout_height="24dp"
-                                app:srcCompat="@drawable/ic_qemu"
-                                android:contentDescription="@null" />
+                                app:srcCompat="@drawable/ic_qemu" />
 
                             <TextView
                                 android:id="@+id/qemuVersion"
@@ -101,8 +99,7 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:padding="8dp"
-                            app:srcCompat="@drawable/free_palestine"
-                            android:contentDescription="@null" />
+                            app:srcCompat="@drawable/free_palestine" />
 
                         <TextView
                             android:id="@+id/textView2"
@@ -157,8 +154,7 @@
                         android:padding="8dp"
                         android:textAlignment="textStart"
                         android:src="@drawable/ic_github"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more" />
+                        app:tint="?attr/colorControlNormal"/>
 
                     <ImageButton
                         android:id="@+id/btn_discord"
@@ -169,8 +165,7 @@
                         android:padding="8dp"
                         android:textAlignment="textStart"
                         android:src="@drawable/ic_discord"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more" />
+                        app:tint="?attr/colorControlNormal" />
 
                     <ImageButton
                         android:id="@+id/btn_telegram"
@@ -181,8 +176,7 @@
                         android:padding="8dp"
                         android:textAlignment="textStart"
                         android:src="@drawable/ic_telegram"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more"/>
+                        app:tint="?attr/colorControlNormal"/>
 
                     <ImageButton
                         android:id="@+id/btn_youtube"
@@ -193,8 +187,7 @@
                         android:padding="8dp"
                         android:textAlignment="textStart"
                         android:src="@drawable/ic_youtube"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more"/>
+                        app:tint="?attr/colorControlNormal"/>
 
                     <ImageButton
                         android:id="@+id/btn_instagram"
@@ -205,8 +198,7 @@
                         android:padding="8dp"
                         android:textAlignment="textStart"
                         android:src="@drawable/ic_instagram"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more"/>
+                        app:tint="?attr/colorControlNormal"/>
 
                     <ImageButton
                         android:id="@+id/btn_facebook"
@@ -218,8 +210,7 @@
                         android:textAlignment="textStart"
                         android:visibility="gone"
                         android:src="@drawable/ic_facebook"
-                        app:tint="?attr/colorControlNormal"
-                        android:contentDescription="@string/more"/>
+                        app:tint="?attr/colorControlNormal"/>
 
                 </LinearLayout>
 

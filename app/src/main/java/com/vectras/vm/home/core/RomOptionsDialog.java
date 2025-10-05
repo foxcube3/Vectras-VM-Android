@@ -17,7 +17,7 @@ import java.util.List;
 public class RomOptionsDialog {
     public static void showNow(Activity activity, List<DataMainRoms> data, int position, String vmID, String vmName, String arch) {
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(activity);
-    View v = activity.getLayoutInflater().inflate(R.layout.rom_options_dialog, new android.widget.FrameLayout(activity), false);
+        View v = activity.getLayoutInflater().inflate(R.layout.rom_options_dialog, null);
         bottomSheetDialog.setContentView(v);
 
         Button modifyRomBtn = v.findViewById(R.id.modifyRomBtn);
