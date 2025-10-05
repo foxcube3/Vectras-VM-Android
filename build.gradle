@@ -1,15 +1,4 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.2'
-        classpath 'com.google.gms:google-services:4.4.3'
-        // Firebase Crashlytics Gradle plugin
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.8'
-    }
-}
+// Replaced legacy buildscript/classpath with version catalog plugin aliases (see settings.gradle)
 
 allprojects {
     repositories {
@@ -18,9 +7,9 @@ allprojects {
     }
 }
 
-// Force consistent Kotlin stdlib versions to avoid duplicate-class errors between 1.6.x and 1.8.x
+// Force consistent Kotlin stdlib version across modules
 subprojects {
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith('kotlin-stdlib')) {
                 details.useVersion '1.8.10'

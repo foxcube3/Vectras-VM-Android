@@ -1,5 +1,5 @@
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
 }
 
 android {
@@ -487,6 +487,17 @@ tasks.register('envCheck') {
         // Assert critical plugins are on expected versions (best-effort)
         def agp = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
         logger.lifecycle("envCheck: Android Gradle Plugin version = ${agp}")
+
+        // If signature verification is requested, ensure gpg is available
+        def sigRequested = (project.findProperty('firmwareSigUrl') ?: System.getenv('QEMU_VARS_SIG_URL'))
+        if (sigRequested) {
+            def gpgOk = ['gpg','--version'].execute()
+            gpgOk.waitForOrKill(5000)
+            if (gpgOk.exitValue() != 0) {
+                throw new GradleException('envCheck: gpg not found on PATH but firmware signature URL provided.')
+            }
+            logger.lifecycle('envCheck: gpg available for signature verification.')
+        }
     }
 }
 

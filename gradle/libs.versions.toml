@@ -45,7 +45,7 @@ espresso = { module = "androidx.test.espresso:espresso-core", version.ref = "esp
 "glide-compiler" = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 "glide" = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 
-# Build plugins (declared as libraries for central versioning)
-google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
-firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
-android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "android-gradle-plugin" }
+[plugins]
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
