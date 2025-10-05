@@ -67,16 +67,42 @@ dependencies {
 
 // --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------
 // Provides a lightweight way to obtain large firmware files (e.g., QEMU_VARS.img)
-// without committing them to the fork repository. The URL can point to a Release asset
-// or an external CDN. Adjust FIRMWARE_URL as needed.
-ext.FIRMWARE_URL = System.getenv('QEMU_VARS_URL') ?: "https://example.com/path/to/QEMU_VARS.img"
+// without committing them to this fork. Precedence for URL selection:
+//   -PfirmwareUrl Gradle property > QEMU_VARS_URL env var > placeholder default.
+// Optional integrity check:
+//   -PfirmwareSha256 or QEMU_VARS_SHA256 env var (expected lowercase hex). If provided, the
+// downloaded file's SHA-256 must match or the build fails.
+// Retry behavior controlled by -PfirmwareAttempts (default 3) or env QEMU_VARS_ATTEMPTS.
+// Skip fetch: -PskipFirmware ; Skip verification: -PskipFirmwareVerify
+// NOTE: If both skipFirmware and verify requested, verify is effectively skipped (no file).
+
 def firmwareDir = file("${project.projectDir}/src/main/assets/roms")
 def firmwareFile = file("${firmwareDir}/QEMU_VARS.img")
 
+def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv('QEMU_VARS_URL') ?: 'https://example.com/path/to/QEMU_VARS.img')
+def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv('QEMU_VARS_SHA256'))
+def maxAttempts = (project.findProperty('firmwareAttempts') ?: System.getenv('QEMU_VARS_ATTEMPTS') ?: '3') as int
+def skipFirmware = project.hasProperty('skipFirmware')
+def skipFirmwareVerify = project.hasProperty('skipFirmwareVerify')
+
+def computeSha256 = { File f ->
+    if (!f.exists()) return null
+    def md = java.security.MessageDigest.getInstance('SHA-256')
+    f.withInputStream { is ->
+        byte[] buf = new byte[8192]
+        int r
+        while ((r = is.read(buf)) != -1) {
+            md.update(buf, 0, r)
+        }
+    }
+    return md.digest().collect { String.format('%02x', it) }.join('')
+}
+
 tasks.register('fetchFirmware') {
-    description = 'Downloads QEMU_VARS.img firmware asset if not already present.'
+    description = 'Downloads QEMU_VARS.img firmware asset if missing (with retries & optional SHA-256 verify).'
     group = 'vectras'
     outputs.file(firmwareFile)
+    onlyIf { !skipFirmware }
     doLast {
         if (firmwareFile.exists()) {
             logger.lifecycle("Firmware already present: ${firmwareFile} (${firmwareFile.length()} bytes)")
@@ -85,36 +111,95 @@ tasks.register('fetchFirmware') {
         if (!firmwareDir.exists() && !firmwareDir.mkdirs()) {
             throw new GradleException("Could not create firmware directory: ${firmwareDir}")
         }
-        def url = new URL(ext.FIRMWARE_URL)
-        logger.lifecycle("Downloading firmware from ${url} ...")
-        url.openConnection().with { conn ->
-            conn.connectTimeout = 15000
-            conn.readTimeout = 600000 // 10 min for large file
-            conn.inputStream.withCloseable { input ->
-                firmwareFile.withOutputStream { out ->
-                    byte[] buf = new byte[1 * 1024 * 1024]
-                    long total = 0
-                    int r
-                    long lastReport = System.currentTimeMillis()
-                    while ((r = input.read(buf)) != -1) {
-                        out.write(buf, 0, r)
-                        total += r
-                        def now = System.currentTimeMillis()
-                        if (now - lastReport > 5000) { // report every 5s
-                            logger.lifecycle(String.format(Locale.ROOT, "Downloaded %,d bytes...", total))
-                            lastReport = now
+        logger.lifecycle("Fetching firmware from ${firmwareUrl} (attempts max=${maxAttempts})")
+        int attempt = 1
+        boolean success = false
+        while (attempt <= maxAttempts && !success) {
+            File tmp = new File(firmwareFile.parentFile, firmwareFile.name + '.part')
+            if (tmp.exists()) tmp.delete()
+            try {
+                def url = new URL(firmwareUrl)
+                url.openConnection().with { conn ->
+                    conn.connectTimeout = 15000
+                    conn.readTimeout = 600000 // 10 min
+                    conn.inputStream.withCloseable { input ->
+                        tmp.withOutputStream { out ->
+                            byte[] buf = new byte[1 * 1024 * 1024]
+                            long total = 0
+                            long lastReport = System.currentTimeMillis()
+                            int r
+                            while ((r = input.read(buf)) != -1) {
+                                out.write(buf, 0, r)
+                                total += r
+                                def now = System.currentTimeMillis()
+                                if (now - lastReport > 5000) {
+                                    logger.lifecycle(String.format(Locale.ROOT, "[attempt %d] Downloaded %,d bytes...", attempt, total))
+                                    lastReport = now
+                                }
+                            }
+                            logger.lifecycle(String.format(Locale.ROOT, "[attempt %d] Download complete (%,d bytes).", attempt, total))
                         }
                     }
-                    logger.lifecycle(String.format(Locale.ROOT, "Firmware download complete (%,d bytes).", total))
+                }
+                // Atomic move
+                if (firmwareFile.exists()) firmwareFile.delete()
+                if (!tmp.renameTo(firmwareFile)) {
+                    throw new GradleException("Could not rename temp file ${tmp} to ${firmwareFile}")
+                }
+                success = true
+            } catch (Throwable t) {
+                logger.warn("[attempt ${attempt}] Firmware download failed: ${t.class.simpleName}: ${t.message}")
+                attempt++
+                if (attempt <= maxAttempts) {
+                    long backoff = (long)Math.min(30000, Math.pow(2, attempt - 2) * 1000L) // 1s,2s,4s,8s...
+                    logger.lifecycle("Retrying in ${backoff} ms ...")
+                    sleep(backoff)
                 }
             }
+        }
+        if (!success) {
+            throw new GradleException("Failed to download firmware after ${maxAttempts} attempts: ${firmwareUrl}")
+        }
+        if (expectedSha256) {
+            def actual = computeSha256(firmwareFile)
+            if (!actual?.equalsIgnoreCase(expectedSha256)) {
+                firmwareFile.delete()
+                throw new GradleException("Firmware SHA-256 mismatch. Expected=${expectedSha256} Actual=${actual}")
+            }
+            logger.lifecycle("Firmware SHA-256 verified: ${actual}")
+        } else {
+            logger.lifecycle("No expected SHA-256 provided; skipping integrity verification.")
         }
     }
 }
 
-// Ensure firmware is present before building APK (can be skipped via -PskipFirmware)
+tasks.register('verifyFirmware') {
+    description = 'Verifies existing firmware file matches expected SHA-256 (if provided).'
+    group = 'vectras'
+    dependsOn tasks.named('fetchFirmware')
+    doLast {
+        if (skipFirmware) {
+            logger.lifecycle('Firmware fetch skipped; verifyFirmware doing nothing.')
+            return
+        }
+        if (!firmwareFile.exists()) {
+            throw new GradleException("Firmware file not found: ${firmwareFile}")
+        }
+        if (expectedSha256 && !skipFirmwareVerify) {
+            def actual = computeSha256(firmwareFile)
+            if (!actual?.equalsIgnoreCase(expectedSha256)) {
+                throw new GradleException("Firmware verification failed. Expected=${expectedSha256} Actual=${actual}")
+            }
+            logger.lifecycle("Firmware verification succeeded (SHA-256=${actual}).")
+        } else {
+            logger.lifecycle("No firmware SHA-256 provided or verification skipped.")
+        }
+    }
+}
+
+// Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {
-    if (!project.hasProperty('skipFirmware')) {
+    if (!skipFirmware) {
         dependsOn tasks.named('fetchFirmware')
     } else {
         logger.lifecycle('Skipping firmware fetch due to -PskipFirmware flag.')
