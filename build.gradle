@@ -53,6 +53,14 @@ tasks.register('verifyNoLfsPointers') {
     }
 }
 
-tasks.named('check') {
-    dependsOn 'verifyNoLfsPointers'
+// Root project may not have a 'check' task (no java/android plugin applied). Guard it.
+def existingCheck = tasks.findByName('check')
+if (existingCheck != null) {
+    existingCheck.dependsOn 'verifyNoLfsPointers'
+} else {
+    tasks.register('check') {
+        group = 'verification'
+        description = 'Aggregate verification task (auto-created); includes verifyNoLfsPointers.'
+        dependsOn 'verifyNoLfsPointers'
+    }
 }
