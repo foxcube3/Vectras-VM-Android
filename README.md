@@ -149,16 +149,16 @@ Caching: ETag stored in a `.meta` file; future fetches can leverage conditional 
 Linux/macOS:
 
 ```bash
-export QEMU_VARS_URL="https://downloads.example.com/firmware/QEMU_VARS-default.img"
-export QEMU_VARS_SHA256="3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a" # sample SHA256
+export QEMU_VARS_URL="https://your.hosted.location/QEMU_VARS-default.img"
+export QEMU_VARS_SHA256="<expected_sha256>"
 ./gradlew assembleDebug
 ```
 
 PowerShell:
 
 ```powershell
-$env:QEMU_VARS_URL = "https://downloads.example.com/firmware/QEMU_VARS-default.img"
-$env:QEMU_VARS_SHA256 = "3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a"  # sample SHA256
+$env:QEMU_VARS_URL = "https://your.hosted.location/QEMU_VARS-default.img"
+$env:QEMU_VARS_SHA256 = "<expected_sha256>"
 ./gradlew.bat assembleDebug
 ```
 
@@ -166,8 +166,8 @@ Using Gradle properties instead of env vars:
 
 ```bash
 ./gradlew assembleDebug \
-  -PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img \
-  -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a \
+  -PfirmwareUrl=https://your.hosted.location/QEMU_VARS-default.img \
+  -PfirmwareSha256=<expected_sha256> \
   -PfirmwareVariant=default
 ```
 
@@ -208,7 +208,7 @@ Just fetch (default variant):
 Fetch + verify specific variant:
 
 ```bash
-./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a
+./gradlew :app:verifyFirmware -PfirmwareVariant=debug -PfirmwareSha256=<expected_sha256>
 ```
 
 Print hash:
@@ -220,7 +220,7 @@ Print hash:
 CI helper:
 
 ```bash
-./gradlew :app:ciFirmwareCheck -PfirmwareSha256=3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a
+./gradlew :app:ciFirmwareCheck -PfirmwareSha256=<expected_sha256>
 ```
 
 ### Verification Failure Handling
@@ -244,25 +244,25 @@ On mismatch the file is deleted and the build fails, preventing stale/incomplete
 
 1. Generate a detached signature for the exact firmware binary you intend to distribute:
 
-   ```bash
-   gpg --armor --detach-sign --output QEMU_VARS-default.img.sig QEMU_VARS-default.img
-   ```
+  ```bash
+  gpg --armor --detach-sign --output QEMU_VARS-default.img.sig QEMU_VARS-default.img
+  ```
 
 1. Host both `QEMU_VARS-default.img` and `QEMU_VARS-default.img.sig` (same directory recommended).
 
 1. Provide the signature location via either:
 
-   - Environment: `QEMU_VARS_SIG_URL=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
-   - Property: `-PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
+- Environment: `QEMU_VARS_SIG_URL=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
+- Property: `-PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig`
 
 1. Run (locally / CI):
 
-   ```bash
-   ./gradlew :app:verifyFirmwareSignature \
-     -PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img \
-     -PfirmwareSha256=<real_sha256> \
-     -PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig
-   ```
+  ```bash
+  ./gradlew :app:verifyFirmwareSignature \
+    -PfirmwareUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img \
+    -PfirmwareSha256=<real_sha256> \
+    -PfirmwareSigUrl=https://downloads.example.com/firmware/QEMU_VARS-default.img.sig
+  ```
 
 1. Ensure the correct public key is imported in the CI environment (e.g., `gpg --import public-key.asc`).
 

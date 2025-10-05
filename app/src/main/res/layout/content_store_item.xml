@@ -38,7 +38,8 @@
                             android:id="@+id/ivIcon"
                             android:layout_width="84dp"
                             android:layout_height="84dp"
-                            android:scaleType="fitXY" />
+                            android:scaleType="fitXY"
+                            android:contentDescription="@null" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -106,7 +107,8 @@
                                 android:adjustViewBounds="true"
                                 android:clickable="true"
                                 android:foreground="?android:attr/selectableItemBackground"
-                                android:scaleType="centerCrop" />
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@string/open" />
 
                             <ImageView
                                 android:id="@+id/ivPrv1"
@@ -116,7 +118,8 @@
                                 android:adjustViewBounds="true"
                                 android:clickable="true"
                                 android:foreground="?android:attr/selectableItemBackground"
-                                android:scaleType="centerCrop" />
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@string/open" />
 
                             <ImageView
                                 android:id="@+id/ivPrv2"
@@ -126,7 +129,8 @@
                                 android:adjustViewBounds="true"
                                 android:clickable="true"
                                 android:foreground="?android:attr/selectableItemBackground"
-                                android:scaleType="centerCrop" />
+                                android:scaleType="centerCrop"
+                                android:contentDescription="@string/open" />
                         </LinearLayout>
                     </ScrollView>
 

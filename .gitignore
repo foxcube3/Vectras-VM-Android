@@ -1,7 +1,6 @@
 #############################################
 # General Android / Gradle ignore patterns  #
 #############################################
-
 # Built application files
 *.apk
 *.aar
@@ -18,7 +17,7 @@
 /bin/
 /gen/
 /out/
-
+# Uncomment the following line in case you need and you don't have the release build type files in your app
 # Gradle files
 .gradle/
 /build/
@@ -123,4 +122,3 @@ pr-body-current.txt
 pr-body-history-followup.txt
 collect-git-objects.ps1
 find-large-blobs.ps1
-

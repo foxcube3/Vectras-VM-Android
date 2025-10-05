@@ -1,5 +1,9 @@
 plugins {
+<<<<<<< HEAD
     alias(libs.plugins.android.application)
+=======
+    id 'com.android.application'
+>>>>>>> origin/master
 }
 
 android {
@@ -48,7 +52,11 @@ dependencies {
     implementation libs.androidx.appcompat
     implementation libs.androidx.core.ktx
     implementation libs.material
+<<<<<<< HEAD
     implementation libs.preference
+=======
+    implementation 'androidx.preference:preference:1.2.0' // not yet moved to catalog
+>>>>>>> origin/master
     implementation libs.constraintlayout
     implementation libs.lottie
     implementation project(':terminal-view')
@@ -57,10 +65,16 @@ dependencies {
     implementation libs.retrofit.gson
     implementation libs.guava
     implementation libs.ztzip
+<<<<<<< HEAD
     implementation libs.swiperefreshlayout
     implementation libs.activity.ktx
     implementation libs.recyclerview
     // (Legacy explicit versions block from master removed in favor of version catalog above)
+=======
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0' // could be added to catalog
+    implementation libs.activity.ktx
+    implementation libs.recyclerview
+>>>>>>> origin/master
 }
 
 // --- Firmware / ROM asset fetch (non-LFS on fork) ------------------------------------------
@@ -90,10 +104,13 @@ def firmwareFile = firmwareFiles[0]
 
 def firmwareUrl = (project.findProperty('firmwareUrl') ?: System.getenv(primaryAsset.envUrl) ?: "https://example.com/path/to/${primaryAsset.base}-${firmwareVariant}.${primaryAsset.ext}")
 def expectedSha256 = (project.findProperty('firmwareSha256') ?: System.getenv(primaryAsset.envSha))
+<<<<<<< HEAD
 def sampleShaPlaceholder = '3d4c2c9f1a9e5b4b2f6a2e7c0f1d3b4c5a6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a'
 if (expectedSha256 && expectedSha256.equalsIgnoreCase(sampleShaPlaceholder) && !project.hasProperty('allowSampleFirmwareSha')) {
     logger.warn("WARNING: Using sample placeholder firmware SHA-256. Replace with production value or pass -PallowSampleFirmwareSha to suppress this warning.")
 }
+=======
+>>>>>>> origin/master
 def maxAttempts = (project.findProperty('firmwareAttempts') ?: System.getenv('QEMU_VARS_ATTEMPTS') ?: '3') as int
 def skipFirmware = project.hasProperty('skipFirmware')
 def skipFirmwareVerify = project.hasProperty('skipFirmwareVerify')
@@ -237,6 +254,7 @@ tasks.register('fetchFirmware') {
 }
 
 // --- Optional GPG signature verification (detached .sig) -----------------------------
+// --- Optional GPG signature verification (detached .sig) -----------------------------
 // Provide -PfirmwareSigUrl or env QEMU_VARS_SIG_URL for primary asset. Requires gpg in PATH.
 def firmwareSigUrl = (project.findProperty('firmwareSigUrl') ?: System.getenv('QEMU_VARS_SIG_URL'))
 def firmwareSigFile = file("${firmwareFile}.sig")
@@ -285,7 +303,6 @@ tasks.register('ciAllFirmwareSecureCheck') {
     group = 'verification'
     dependsOn 'fetchAllFirmware', 'verifyFirmware', 'printFirmwareSha256', 'verifyFirmwareSignature'
 }
-
 tasks.register('verifyFirmware') {
     description = 'Verifies existing firmware file matches expected SHA-256 (if provided).'
     group = 'vectras'
@@ -425,6 +442,7 @@ tasks.register('ciFirmwareCheck') {
 }
 
 // Lightweight guard assertion (non-fatal) to help ensure sample SHA not shipped accidentally.
+// Lightweight guard assertion (non-fatal) to help ensure sample SHA not shipped accidentally.
 tasks.register('assertNoSampleFirmwareSha') {
     group = 'verification'
     description = 'Fails if the sample placeholder firmware SHA is still configured (unless allow flag present).'
@@ -445,7 +463,6 @@ tasks.register('firmwareQualityGate') {
     description = 'Fetch all firmware, verify primary hash, optional signature, print hash, and assert sample SHA not used.'
     dependsOn 'ciAllFirmwareSecureCheck', 'assertNoSampleFirmwareSha'
 }
-
 // Ensure firmware is present before building APK (unless skipped)
 tasks.matching { it.name == 'preBuild' }.configureEach {
     if (!skipFirmware) {
@@ -455,6 +472,7 @@ tasks.matching { it.name == 'preBuild' }.configureEach {
     }
 }
 
+// Minimal environment validation task (no firmware download) for CI quick-check
 // Minimal environment validation task (no firmware download) for CI quick-check
 tasks.register('envCheck') {
     group = 'verification'

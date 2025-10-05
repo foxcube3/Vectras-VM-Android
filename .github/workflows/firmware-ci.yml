@@ -33,6 +33,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle/libs.versions.toml') }}
           restore-keys: ${{ runner.os }}-gradle-
       - name: Firmware Cache
+      - name: Firmware Cache
         uses: actions/cache@v4
         with:
           path: app/src/main/assets/roms

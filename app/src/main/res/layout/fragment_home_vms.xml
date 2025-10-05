@@ -41,7 +41,8 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/package_2_96px" />
+                    android:src="@drawable/package_2_96px"
+                    android:contentDescription="@null" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -133,7 +134,7 @@
         android:orientation="vertical"
         android:visibility="visible">
 
-        <com.google.android.material.loadingindicator.LoadingIndicator
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
