@@ -1,0 +1,8 @@
+{
+  "pull_request": {
+    "merged": true,
+    "base": { "ref": "master" },
+    "labels": [ { "name": "release" } ]
+  },
+  "repository": { "default_branch": "master" }
+}

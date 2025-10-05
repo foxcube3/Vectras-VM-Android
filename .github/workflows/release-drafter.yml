@@ -1,34 +1,74 @@
 name: Release Drafter
 
+# Runs only when a PR targeting master is closed (merged) or when manually dispatched.
 on:
-  push:
+  pull_request:
+    types: [ closed ]
     branches: [ master ]
   workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the release (creates tag)'
+        required: false
+        default: 'false'
 
 permissions:
-  contents: write        # update release drafts
-  pull-requests: read    # read PR labels/titles for autolabeler
+  contents: write        # needed to create/update (draft) release & tag
+  pull-requests: read    # read PR data for labels, title, etc.
 
 concurrency:
-  group: release-drafter-${{ github.ref }}
+  group: release-drafter-${{ github.run_id }}
   cancel-in-progress: true
 
 jobs:
-  update:
+  draft_or_publish:
+    name: Draft / (Optional) Publish Release
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
+    # Allow manual dispatch always; for PR event ensure it is a merged PR.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
+
       - name: Verify config exists
         run: |
           test -f .github/release-drafter.yml || { echo 'Config missing'; exit 1; }
-      - name: Run Release Drafter (update draft only)
+
+      - name: Decide whether to publish
+        id: publish
+        run: |
+          PUBLISH=false
+          echo "Event: $GITHUB_EVENT_NAME"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.publish }}" = "true" ]; then PUBLISH=true; fi
+          elif [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            # Auto-publish if the merged PR has a label 'release' or 'publish'
+            echo 'PR labels:'
+            jq -r '.pull_request.labels[].name' < "$GITHUB_EVENT_PATH" || true
+            if jq -e '.pull_request.labels[] | select(.name=="release" or .name=="publish")' < "$GITHUB_EVENT_PATH" >/dev/null 2>&1; then
+              PUBLISH=true
+            fi
+          fi
+          echo "Computed publish=$PUBLISH"
+          echo "publish=$PUBLISH" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Run Release Drafter (draft or publish)
         uses: release-drafter/release-drafter@v6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           config-name: .github/release-drafter.yml
-          config-name: .github/release-drafter.yml
+          publish: ${{ steps.publish.outputs.publish }}
+        # When publish=true the action will create the tag referenced by the resolved version.
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.publish.outputs.publish }}" = "true" ]; then
+            echo "Published release (tag created)." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Updated draft release only (no tag)." >> $GITHUB_STEP_SUMMARY
+          fi
