@@ -5,7 +5,6 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
 jobs:
   build:
 
@@ -19,6 +18,9 @@ jobs:
 
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
+
+    - name: Add apksigner to PATH
+      run: echo "$ANDROID_HOME/build-tools/36.0.0" >> $GITHUB_PATH
 
     - name: Download Keystore Artifact
       uses: actions/download-artifact@v4
