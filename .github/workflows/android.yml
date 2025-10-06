@@ -13,7 +13,22 @@ jobs:
     environment: BuildAPK
 
     steps:
+
     - uses: actions/checkout@v4
+
+    - name: Download Keystore Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: vectras-keystore
+        path: .
+
+    - name: Upload Keystore as Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: vectras-keystore
+        path: vectras.jks
+        if-no-files-found: error
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
@@ -34,8 +49,15 @@ jobs:
     - name: Build Universal Debug APK
       run: ./gradlew assembleDebug
 
+
     - name: Build Universal Release APK
       run: ./gradlew assembleRelease
+
+    - name: Sign Universal Release APK
+      run: |
+        apksigner sign --ks vectras.jks --ks-key-alias ${{ secrets.KEY_ALIAS }} --ks-pass pass:${{ secrets.KEYSTORE_PASSWORD }} --key-pass pass:${{ secrets.KEY_PASSWORD }} app/build/outputs/apk/release/app-universal-release-unsigned.apk
+      env:
+        JAVA_HOME: ${{ env.JAVA_HOME }}
 
 
 
