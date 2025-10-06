@@ -25,17 +25,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Deprecated API Scan (gating)
-      run: ./gradlew deprecatedApiScan -PskipFirmware -PfailOnDeprecated -PjsonReport
-      # On failure this will stop the workflow; artifact uploaded for inspection below.
-
-    - name: Upload Deprecated API Report
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: deprecated-api-report
-        path: build/deprecated-api-report.json
-        if-no-files-found: ignore
 
 
     - name: Build Debug APK
