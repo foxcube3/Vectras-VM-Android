@@ -26,13 +26,6 @@ jobs:
         name: vectras-keystore
         path: .
 
-    - name: Upload Keystore as Artifact
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: vectras-keystore
-        path: vectras.jks
-        if-no-files-found: error
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4
