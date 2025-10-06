@@ -3,7 +3,7 @@
     "archiveSha256": null,
     "architecture": "arm64",
     "primarySource": "archive",
-    "generatedAtUtc": "2025-10-05T23:37:05Z",
+    "generatedAtUtc": "2025-10-06T08:12:59Z",
     "files": [
         {
             "name": "bios.bin",

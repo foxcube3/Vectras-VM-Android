@@ -69,9 +69,6 @@ dependencies {
 }
 
 // Ensure Java 17 language level for switch expressions/rules
-tasks.withType(JavaCompile).configureEach {
-    options.release = 17
-}
 
 publishing {
     publications {

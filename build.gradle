@@ -22,10 +22,10 @@ subprojects {
 }
 
 ext {
-    // Switched to stable API 34 per request (was preview 36). Override via -PCOMPILE_API / -PTARGET_API / -PTOOLS_VERSION if needed.
-    toolsVersion = properties.get('TOOLS_VERSION', '34.0.0')
-    compileApi = properties.get('COMPILE_API', 34)
-    targetApi = properties.get('TARGET_API', 34)
+    // Updated to stable API 36 per request. Override via -PCOMPILE_API / -PTARGET_API / -PTOOLS_VERSION if needed.
+    toolsVersion = properties.get('TOOLS_VERSION', '36.0.0')
+    compileApi = properties.get('COMPILE_API', 36)
+    targetApi = properties.get('TARGET_API', 36)
     minApi = properties.get('MIN_API', 26) // Increased earlier to 26
 }
 

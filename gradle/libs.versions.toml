@@ -18,7 +18,7 @@ ext-junit = "1.1.5"
 espresso = "3.5.1"
 google-services = "4.4.3"
 firebase-crashlytics-gradle = "2.9.8"
-android-gradle-plugin = "8.3.2"
+android-gradle-plugin = "8.13.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "androidx-appcompat" }
